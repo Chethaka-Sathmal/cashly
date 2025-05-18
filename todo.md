@@ -1,0 +1,5 @@
+- [ ] Add assets
+- [ ] Add fonts (OpenSans, Space Grotesk)
+- [ ] Create type definitions for data
+- [ ] Create fake data for development
+- [ ] Seed database
