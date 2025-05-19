@@ -3,3 +3,4 @@
 - [ ] Create type definitions for data
 - [ ] Create fake data for development
 - [ ] Seed database
+- [x] Add favicon
