@@ -1,6 +1,8 @@
+- [ ] Add authentication
 - [ ] Add assets
 - [ ] Add fonts (OpenSans, Space Grotesk)
 - [ ] Create type definitions for data
-- [ ] Create fake data for development
+- [x] Create fake data for development
 - [ ] Seed database
 - [x] Add favicon
+- [x] Figure our file layout
