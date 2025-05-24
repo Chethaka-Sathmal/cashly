@@ -1,5 +1,3 @@
-import Expense from "@/app/(dashboard)/expense/page";
-
 export interface UserProps {
   userID: string;
   userName: string;
