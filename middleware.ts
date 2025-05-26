@@ -8,8 +8,8 @@ export default clerkMiddleware(
     if (!publicRoutes(req)) {
       await auth.protect();
     }
-  },
-  { debug: true } // ❌ Remove in prod
+  }
+  // { debug: true } // ❌ Remove in prod
 );
 
 export const config = {
