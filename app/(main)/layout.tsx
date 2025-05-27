@@ -1,6 +1,6 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import Header from "@/components/header";
+import AppHeader from "@/components/app-header";
 
 export default function Page({ children }: { children: React.ReactNode }) {
   return (
@@ -33,7 +33,7 @@ export default function Page({ children }: { children: React.ReactNode }) {
             </BreadcrumbList>
           </Breadcrumb>
         </header> */}
-        <Header title="Test" />
+        <AppHeader />
         <div>{children}</div>
       </SidebarInset>
     </SidebarProvider>
