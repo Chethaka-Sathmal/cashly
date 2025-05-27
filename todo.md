@@ -1,6 +1,6 @@
-- [ ] Add authentication
+- [x] Add authentication
 - [ ] Add assets
-- [ ] Add fonts (OpenSans, Space Grotesk)
+- [x] Add fonts (OpenSans, Roboto Slab)
 - [ ] Create type definitions for data
 - [x] Create fake data for development
 - [ ] Seed database
