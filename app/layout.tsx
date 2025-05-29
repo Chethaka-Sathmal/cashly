@@ -37,7 +37,7 @@ export default function RootLayout({
         lang="en"
         className={`${inter.variable} ${robotoSlab.variable} antialiased`}
       >
-        <body className="font-inter">
+        <body className="font-inter bg-background">
           {/* <header className="flex justify-end items-center p-4 gap-4 h-16">
             <SignedOut>
               <SignInButton />

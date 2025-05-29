@@ -48,7 +48,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(96.7% 0.003 264.542);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -81,6 +81,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   /* Custom variable */
   --theme: #395fe7;
+  --card-border: oklch(0.922 0 0); /* Based on sidebar-border */
 }
 
 .dark {
