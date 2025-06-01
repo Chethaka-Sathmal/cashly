@@ -1,3 +1,11 @@
+import { z, ZodType, ZodSchema } from "zod";
+import type { UseFormReturn, FieldValues } from "react-hook-form";
+import {
+  signUpFromSchema,
+  signInFromSchema,
+  onboardingFromSchema,
+} from "@/lib/zod-schema";
+
 export interface UserProps {
   userID: string;
   userName: string;
@@ -42,3 +50,15 @@ interface ExpenseTransaction extends BaseTransaction {
 }
 
 export type TransactionProps = IncomeTransaction | ExpenseTransaction;
+
+// export type SignUpFromSchemaProps = z.infer<typeof signUpFromSchema>;
+// export type SignInFromSchemaProps = z.infer<typeof signInFromSchema>;
+// export type OnboardingFromSchemaProps = z.infer<typeof onboardingFromSchema>;
+
+export interface AuthFormProps<T extends FieldValues> {
+  className?: string;
+  variant: "sign-in" | "sign-up";
+  onSubmit: (data: T) => void;
+  schema: ZodType<T>;
+  defaultValues?: T;
+}
