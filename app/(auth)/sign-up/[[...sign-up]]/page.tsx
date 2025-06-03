@@ -9,7 +9,7 @@ import VerificationFrom from "@/components/verification-form";
 
 export default function SignUpPage() {
   const { isLoaded, signUp, setActive } = useSignUp();
-  const [verifying, setVerifying] = useState(true);
+  const [verifying, setVerifying] = useState(false);
   type SignUpFormSchemaProps = z.infer<typeof signUpFromSchema>;
 
   async function onSubmit(data: SignUpFormSchemaProps) {
@@ -19,6 +19,9 @@ export default function SignUpPage() {
       await signUp.create({
         emailAddress: data.email,
         password: data.password,
+        unsafeMetadata: {
+          onboardingComplete: false,
+        },
       });
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });

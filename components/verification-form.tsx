@@ -36,9 +36,11 @@ export default function VerificationFrom() {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code: data.code,
       });
-      if (completeSignUp.status !== "complete") {
-        console.log(JSON.stringify(completeSignUp, null, 2));
-      }
+
+      // if (completeSignUp.status !== "complete") {
+      //   console.log(JSON.stringify(completeSignUp, null, 2));
+      // }
+
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
         // router.push("/");
@@ -52,26 +54,31 @@ export default function VerificationFrom() {
 
   return (
     <section className="flex justify-center items-center">
-      <Card className="bg-white shadow-none w-lg h-[240px]">
+      <Card className="bg-white shadow-none w-lg">
         <CardContent className="flex flex-col gap-6 shadow-none">
-          <div>
-            <h1 className="text-2xl font-bold">Verification Code</h1>
-            <span className="text-muted-foreground text-center text-sm">
-              We sent you a verification code to your email
-            </span>
-          </div>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex flex-col gap-6"
             >
+              <div>
+                <h1 className="text-2xl font-bold">Verification Code</h1>
+                <span className="text-muted-foreground text-center text-sm">
+                  We sent you a verification code to your email
+                </span>
+              </div>
               <FormField
                 control={form.control}
                 name="code"
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Input {...field} className="shadow-none" />
+                      <Input
+                        {...field}
+                        className="shadow-none text-center"
+                        type="text"
+                        inputMode="numeric"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
