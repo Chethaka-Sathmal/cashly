@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const currencyISO_CodesArray = currencyISO_Codes.map((c) => c.value) as [
   string,
@@ -59,6 +60,7 @@ const onboardingFormSchema = z.object({
 });
 
 export default function OnboardingForm() {
+  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: {
@@ -70,10 +72,16 @@ export default function OnboardingForm() {
   });
 
   async function onSubmit(data: z.infer<typeof onboardingFormSchema>) {
+    /**
+     * 🛑
+     * Add functionality
+     * Update user metadata -> Set onboardingComplete to True
+     */
     console.log(`fName: ${data.fName}`);
     console.log(`lName: ${data.lName}`);
     console.log(`currency: ${data.currency}`);
     console.log(`profilePicture: ${data.profilePicture}`);
+    router.replace("/dashboard");
   }
 
   return (
@@ -219,6 +227,7 @@ export default function OnboardingForm() {
               <Button
                 type="submit"
                 className="w-full bg-theme hover:bg-theme/90 active:bg-theme"
+                disabled={form.formState.isSubmitting}
               >
                 Finish
               </Button>

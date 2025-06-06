@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,13 +15,20 @@ import {
 import { useSignUp } from "@clerk/nextjs";
 import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
+import { useRouter } from "next/navigation";
+import { ClerkAPIError } from "@clerk/types";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
+import { Alert, AlertTitle, AlertDescription } from "./ui/alert";
+import { AlertCircleIcon } from "lucide-react";
 
 const verificationSchema = z.object({
   code: z.string(),
 });
 
 export default function VerificationFrom() {
+  const [errors, setErrors] = useState<(ClerkAPIError | string)[]>([]);
   const { isLoaded, signUp, setActive } = useSignUp();
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(verificationSchema),
@@ -37,16 +45,13 @@ export default function VerificationFrom() {
         code: data.code,
       });
 
-      // if (completeSignUp.status !== "complete") {
-      //   console.log(JSON.stringify(completeSignUp, null, 2));
-      // }
-
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        // router.push("/");
+        router.push("/onboarding");
       }
     } catch (err) {
-      console.log("Error:", JSON.stringify(err, null, 2));
+      if (isClerkAPIResponseError(err)) setErrors(err.errors);
+      console.error(JSON.stringify(err, null, 2));
     }
   }
 
@@ -61,11 +66,11 @@ export default function VerificationFrom() {
               onSubmit={form.handleSubmit(onSubmit)}
               className="flex flex-col gap-6"
             >
-              <div>
-                <h1 className="text-2xl font-bold">Verification Code</h1>
-                <span className="text-muted-foreground text-center text-sm">
+              <div className="flex flex-col items-center text-center">
+                <h1 className="text-3xl font-bold">Verification Code</h1>
+                <p className="text-muted-foreground text-balance">
                   We sent you a verification code to your email
-                </span>
+                </p>
               </div>
               <FormField
                 control={form.control}
@@ -84,7 +89,30 @@ export default function VerificationFrom() {
                   </FormItem>
                 )}
               />
-              <Button type="submit">Submit</Button>
+              {errors && errors.length > 0 && (
+                <Alert variant={"destructive"}>
+                  <AlertCircleIcon />
+                  <AlertTitle>Verification error</AlertTitle>
+                  <AlertDescription>
+                    <ul className="list-inside list-disc text-sm">
+                      {errors.map((el, index) => (
+                        <li key={index}>
+                          {typeof el === "string"
+                            ? el
+                            : el.longMessage || el.message}
+                        </li>
+                      ))}
+                    </ul>
+                  </AlertDescription>
+                </Alert>
+              )}
+              <Button
+                type="submit"
+                variant={"theme"}
+                disabled={form.formState.isSubmitting}
+              >
+                Submit
+              </Button>
             </form>
           </Form>
         </CardContent>

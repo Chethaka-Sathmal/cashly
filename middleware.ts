@@ -1,20 +1,25 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-const publicRoutes = createRouteMatcher(["/sign-in(.*)", "/sign-up(.*)", "/"]);
+const publicRoutes = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/forgot-password(.*)",
+  "/",
+]);
 
 // 🛑 Un-comment later
 
-// export default clerkMiddleware(
-//   async (auth, req) => {
-//     console.log("middleware executed");
-//     if (!publicRoutes(req)) {
-//       await auth.protect();
-//     }
-//   }
-//   // { debug: true } // ❌ Remove in prod
-// );
+export default clerkMiddleware(
+  async (auth, req) => {
+    console.log("middleware executed");
+    if (!publicRoutes(req)) {
+      await auth.protect();
+    }
+  }
+  // { debug: true } // ❌ Remove in prod
+);
 
-export default clerkMiddleware();
+// export default clerkMiddleware();
 
 export const config = {
   matcher: [

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,15 +19,22 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { FieldValues, DefaultValues } from "react-hook-form";
 import { z } from "zod";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { AlertCircleIcon, Eye, EyeClosed } from "lucide-react";
+import Link from "next/link";
 
 export default function AuthForm<T extends FieldValues>({
   className,
   variant,
   onSubmit,
+  authenticateWith,
   schema,
   defaultValues,
+  errors,
   ...props
 }: AuthFormProps<T>) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [disabled, setDisabled] = useState(false);
   const isSignIn = variant === "sign-in";
 
   type fromTypes = z.infer<typeof schema>;
@@ -81,23 +89,40 @@ export default function AuthForm<T extends FieldValues>({
                       <FormItem>
                         <div className="flex items-center">
                           <FormLabel>Password</FormLabel>
-                          {isSignIn && (
-                            <a
-                              href="#"
-                              className="ml-auto text-sm underline-offset-2 hover:underline"
+                          {/** ⚠️ Implement forgot password feature later
+                           * Check app/(auth)/forgot-password/page.tsx
+                           */}
+                          {/* {isSignIn && (
+                            <Link
+                              href="/forgot-password"
+                              className="ml-auto text-sm underline-offset-2 hover:underline text-theme"
                             >
                               Forgot your password?
-                            </a>
-                          )}
+                            </Link>
+                          )} */}
                         </div>
                         <FormControl>
-                          <Input
-                            id="password"
-                            type="password"
-                            required
-                            className="shadow-none"
-                            {...field}
-                          />
+                          <div className="flex items-center gap-3">
+                            <Input
+                              id="password"
+                              type={showPassword ? "text" : "password"}
+                              required
+                              className="shadow-none"
+                              {...field}
+                            />
+                            {/* Password visible button */}
+                            <Button
+                              type="button"
+                              variant={"ghost"}
+                              size={"icon"}
+                              className="border-1"
+                              onClick={() =>
+                                setShowPassword((prevValue) => !prevValue)
+                              }
+                            >
+                              {showPassword ? <Eye /> : <EyeClosed />}
+                            </Button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -114,13 +139,27 @@ export default function AuthForm<T extends FieldValues>({
                             <FormLabel>Confirm Password</FormLabel>
                           </div>
                           <FormControl>
-                            <Input
-                              id="confirmPassword"
-                              type="password"
-                              required
-                              className="shadow-none"
-                              {...field}
-                            />
+                            <div className="flex items-center gap-3">
+                              <Input
+                                id="confirmPassword"
+                                type={showPassword ? "text" : "password"}
+                                required
+                                className="shadow-none"
+                                {...field}
+                              />
+                              {/* Password visible button */}
+                              <Button
+                                type="button"
+                                variant={"ghost"}
+                                size={"icon"}
+                                className="border-1"
+                                onClick={() =>
+                                  setShowPassword((prevValue) => !prevValue)
+                                }
+                              >
+                                {showPassword ? <Eye /> : <EyeClosed />}
+                              </Button>
+                            </div>
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -128,7 +167,33 @@ export default function AuthForm<T extends FieldValues>({
                     />
                   </div>
                 )}
-                <Button type="submit" className="w-full shadow-none text-base">
+                <div id="clerk-captcha" />
+                {errors && errors.length > 0 && (
+                  <Alert variant={"destructive"}>
+                    <AlertCircleIcon />
+                    <AlertTitle>
+                      {isSignIn ? "Sign in error" : "Sign up error"}
+                    </AlertTitle>
+                    <AlertDescription>
+                      <ul className="list-inside list-disc text-sm">
+                        {errors.map((el, index) => (
+                          <li key={index}>
+                            {typeof el === "string"
+                              ? el
+                              : el.longMessage || el.message}
+                          </li>
+                        ))}
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {/* Form submit button */}
+                <Button
+                  variant="theme"
+                  type="submit"
+                  disabled={form.formState.isSubmitting || disabled}
+                  className="w-full shadow-none"
+                >
                   {isSignIn ? "Login" : "Sign Up"}
                 </Button>
                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
@@ -137,10 +202,20 @@ export default function AuthForm<T extends FieldValues>({
                   </span>
                 </div>
                 <div className="w-full">
+                  {/* OAuth button */}
                   <Button
                     variant="outline"
                     type="button"
+                    disabled={form.formState.isSubmitting || disabled}
                     className="w-full shadow-none"
+                    onClick={async () => {
+                      setDisabled(true);
+                      try {
+                        await authenticateWith("oauth_google");
+                      } finally {
+                        setDisabled(false);
+                      }
+                    }}
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                       <path
@@ -159,7 +234,7 @@ export default function AuthForm<T extends FieldValues>({
                       Don't have an account?{" "}
                       <a
                         href="/sign-up"
-                        className="underline underline-offset-4"
+                        className="underline underline-offset-4 text-theme font-semibold"
                       >
                         Sign up
                       </a>
@@ -169,7 +244,7 @@ export default function AuthForm<T extends FieldValues>({
                       Already have an account?{" "}
                       <a
                         href="/sign-in"
-                        className="underline underline-offset-4"
+                        className="underline underline-offset-4 text-theme font-semibold"
                       >
                         Sign in
                       </a>

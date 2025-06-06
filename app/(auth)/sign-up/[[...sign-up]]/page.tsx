@@ -6,10 +6,13 @@ import { useSignUp } from "@clerk/nextjs";
 import { signUpFromSchema } from "@/lib/zod-schema";
 import AuthForm from "@/components/auth-form";
 import VerificationFrom from "@/components/verification-form";
+import { ClerkAPIError, OAuthStrategy } from "@clerk/types";
+import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 
 export default function SignUpPage() {
   const { isLoaded, signUp, setActive } = useSignUp();
   const [verifying, setVerifying] = useState(false);
+  const [errors, setErrors] = useState<(ClerkAPIError | string)[]>([]);
   type SignUpFormSchemaProps = z.infer<typeof signUpFromSchema>;
 
   async function onSubmit(data: SignUpFormSchemaProps) {
@@ -26,12 +29,35 @@ export default function SignUpPage() {
 
       await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
       setVerifying(true);
-    } catch (error) {
-      // ⚠ ️ handle errors with RHF
+    } catch (err) {
+      if (isClerkAPIResponseError(err)) setErrors(err.errors);
+      console.error(JSON.stringify(err, null, 2));
     }
   }
 
-  if (!isLoaded) return;
+  function signInWithGoogle(strategy: OAuthStrategy) {
+    if (!signUp) return;
+
+    console.log("Google sign up");
+    return signUp
+      .authenticateWithRedirect({
+        strategy,
+        redirectUrl: "/sign-in/sso-callback", // Check Clerk documentation -> https://clerk.com/docs/custom-flows/oauth-connections
+        redirectUrlComplete: "/onboarding",
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err: any) => {
+        // See https://clerk.com/docs/custom-flows/error-handling
+        // for more info on error handling
+        console.log(err.errors);
+        console.error(err, null, 2);
+        setErrors(err);
+      });
+  }
+
+  if (!isLoaded || !signUp) return null;
 
   if (verifying) return <VerificationFrom />;
 
@@ -40,7 +66,9 @@ export default function SignUpPage() {
       variant="sign-up"
       schema={signUpFromSchema}
       onSubmit={onSubmit}
+      authenticateWith={signInWithGoogle}
       defaultValues={{ email: "", password: "", confirmPassword: "" }}
+      errors={errors}
     />
   );
 }

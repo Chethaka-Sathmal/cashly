@@ -5,6 +5,7 @@ import {
   signInFromSchema,
   onboardingFromSchema,
 } from "@/lib/zod-schema";
+import { ClerkAPIError, OAuthStrategy } from "@clerk/types";
 
 export interface UserProps {
   userID: string;
@@ -59,6 +60,8 @@ export interface AuthFormProps<T extends FieldValues> {
   className?: string;
   variant: "sign-in" | "sign-up";
   onSubmit: (data: T) => void;
+  authenticateWith: (strategy: OAuthStrategy) => void;
   schema: ZodType<T>;
   defaultValues?: T;
+  errors: (ClerkAPIError | string)[];
 }
