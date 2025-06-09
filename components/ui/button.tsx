@@ -20,8 +20,11 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
+        // Defined by Chethaka
         theme:
           "bg-theme hover:bg-theme/90 active:bg-theme text-white disabled:bg-theme/60",
+        destructiveLight:
+          "border-destructive ring-[0.5px] hover:bg-destructive/10 text-destructive dark:hover:bg-destructive/20",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -52,7 +55,10 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(
+        "cursor-pointer",
+        buttonVariants({ variant, size, className })
+      )}
       {...props}
     />
   );

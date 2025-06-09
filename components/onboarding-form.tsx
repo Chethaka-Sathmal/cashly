@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -29,7 +30,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const currencyISO_CodesArray = currencyISO_Codes.map((c) => c.value) as [
@@ -56,10 +57,14 @@ const onboardingFormSchema = z.object({
     })
     .refine((file) => file.type.startsWith("image/"), {
       message: "File must be an image",
-    }),
+    })
+    .optional()
+    .nullable(),
 });
 
 export default function OnboardingForm() {
+  const profilePictureRef = useRef<HTMLInputElement | null>(null);
+
   const router = useRouter();
   const form = useForm({
     resolver: zodResolver(onboardingFormSchema),
@@ -67,7 +72,7 @@ export default function OnboardingForm() {
       fName: "",
       lName: "",
       currency: "LKR",
-      profilePicture: undefined,
+      profilePicture: null,
     },
   });
 
@@ -80,8 +85,10 @@ export default function OnboardingForm() {
     console.log(`fName: ${data.fName}`);
     console.log(`lName: ${data.lName}`);
     console.log(`currency: ${data.currency}`);
-    console.log(`profilePicture: ${data.profilePicture}`);
-    router.replace("/dashboard");
+    console.log(
+      `profilePicture: ${data.profilePicture?.webkitRelativePath === ""}`
+    );
+    // router.replace("/dashboard");
   }
 
   return (
@@ -104,7 +111,9 @@ export default function OnboardingForm() {
                   name="fName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First name</FormLabel>
+                      <FormLabel>
+                        First name <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="ex:John"
@@ -121,7 +130,9 @@ export default function OnboardingForm() {
                   name="lName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last name</FormLabel>
+                      <FormLabel>
+                        Last name <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
                         <Input
                           placeholder="ex:Doe"
@@ -140,7 +151,9 @@ export default function OnboardingForm() {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <div className="flex items-center gap-3">
-                      <FormLabel>Currency</FormLabel>
+                      <FormLabel>
+                        Currency <span className="text-destructive">*</span>
+                      </FormLabel>
                       <Popover>
                         <PopoverTrigger asChild>
                           <FormControl>
@@ -148,7 +161,7 @@ export default function OnboardingForm() {
                               variant="outline"
                               role="combobox"
                               className={cn(
-                                "justify-between shadow-none bg-white w-[300px] md:w-[390px]",
+                                "justify-between shadow-none bg-white w-[285px] md:w-[375px]",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -217,7 +230,28 @@ export default function OnboardingForm() {
                           onChange={(e) => field.onChange(e.target.files?.[0])}
                           name="profilePicture"
                           className="shadow-none"
+                          ref={(el) => {
+                            field.ref(el);
+                            profilePictureRef.current = el;
+                          }}
                         />
+                        <Button
+                          type="button"
+                          variant={"destructiveLight"}
+                          size={"icon"}
+                          className="border-1"
+                          onClick={() => {
+                            form.setValue("profilePicture", undefined, {
+                              shouldValidate: true,
+                            });
+
+                            if (profilePictureRef.current) {
+                              profilePictureRef.current.value = "";
+                            }
+                          }}
+                        >
+                          <Trash2 />
+                        </Button>
                       </div>
                     </FormControl>
                     <FormMessage />
