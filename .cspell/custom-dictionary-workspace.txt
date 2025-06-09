@@ -1,3 +1,5 @@
 # Custom Dictionary Words
 Cashly
 Chethaka
+uploadthing
+clientside

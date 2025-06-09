@@ -13,7 +13,7 @@ import {
   FormMessage,
   FormLabel,
 } from "@/components/ui/form";
-import { Card, CardContent } from "./ui/card";
+import { Card, CardContent, CardHeader } from "./ui/card";
 import { Input } from "./ui/input";
 import { currencyISO_Codes } from "@/utils/constants";
 import {
@@ -32,6 +32,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useUploadThing } from "@/utils/uploadthing";
 
 const currencyISO_CodesArray = currencyISO_Codes.map((c) => c.value) as [
   string,
@@ -52,8 +53,8 @@ const onboardingFormSchema = z.object({
   }),
   profilePicture: z
     .instanceof(File)
-    .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: "Profile picture must be less than 5MB",
+    .refine((file) => file.size <= 4 * 1024 * 1024, {
+      message: "Profile picture must be less than 4MB",
     })
     .refine((file) => file.type.startsWith("image/"), {
       message: "File must be an image",
@@ -76,19 +77,31 @@ export default function OnboardingForm() {
     },
   });
 
+  const { startUpload, isUploading } = useUploadThing("imageUploader");
+
   async function onSubmit(data: z.infer<typeof onboardingFormSchema>) {
     /**
      * 🛑
      * Add functionality
      * Update user metadata -> Set onboardingComplete to True
      */
-    console.log(`fName: ${data.fName}`);
-    console.log(`lName: ${data.lName}`);
-    console.log(`currency: ${data.currency}`);
-    console.log(
-      `profilePicture: ${data.profilePicture?.webkitRelativePath === ""}`
-    );
-    // router.replace("/dashboard");
+    let profilePictureURL = null;
+
+    const fName = data.fName;
+    const lName = data.lName;
+    const currency = data.currency;
+    const profilePicture = data.profilePicture;
+
+    try {
+      if (profilePicture) {
+        // if no profilePicture was selected, defaults to null
+        const ppUploadResult = await startUpload([profilePicture]);
+        profilePictureURL = ppUploadResult?.[0]?.ufsUrl ?? null;
+      }
+      // router.replace("/dashboard");
+    } catch (error) {
+      console.error(JSON.stringify(error));
+    }
   }
 
   return (

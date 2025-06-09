@@ -11,7 +11,11 @@ const publicRoutes = createRouteMatcher([
 
 export default clerkMiddleware(
   async (auth, req) => {
-    console.log("middleware executed");
+    // console.log("middleware executed");
+    if (req.nextUrl.pathname.startsWith("/api/uploadthing")) {
+      return;
+    }
+
     if (!publicRoutes(req)) {
       await auth.protect();
     }

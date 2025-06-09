@@ -37,11 +37,11 @@
 # Later features
 
 - [ ] Add forgot password option
+- [ ] Make auth forms responsive for mobile
 
 # Errors
 
 - [ ] Fix font not applying
-- [ ] UI not working for mobile devices
 
 # Second phase rough plan
 
