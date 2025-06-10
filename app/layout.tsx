@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { ClerkProvider } from "@clerk/nextjs";
 import { Inter, Roboto_Slab } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,16 +32,16 @@ export default function RootLayout({
         className={`${inter.variable} ${robotoSlab.variable} antialiased`}
       >
         <body className="font-inter bg-background">
-          {/* <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header> */}
-          {children}
+          <main>{children}</main>
+          <Toaster
+            position="top-center"
+            toastOptions={{
+              classNames: {
+                // default description text color too light for light mode
+                description: "!text-gray-600",
+              },
+            }}
+          />
         </body>
       </html>
     </ClerkProvider>

@@ -49,3 +49,20 @@
 - Get the user ID of users as they get created from the onboarding page
 - Once the onboarding is done fill users table with user data from the onboarding page
 - Get the user IDs, replace them in the IDs in dev-data and seed the database
+
+# Setting up the database and connections
+
+- [ ] NeonDB workflow
+- [ ] How to structure database queries
+
+# Dashboard
+
+- [ ] total income, expense, balance, saving rate
+- [ ] expense and income category donut chart
+- [ ] Latest transactions
+- [ ] line graph
+
+# next steps for now
+
+- [ ] Create tables
+- [ ] Push the data to table

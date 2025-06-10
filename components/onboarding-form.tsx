@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,9 +13,8 @@ import {
   FormMessage,
   FormLabel,
 } from "@/components/ui/form";
-import { Card, CardContent, CardHeader } from "./ui/card";
+import { Card, CardContent } from "./ui/card";
 import { Input } from "./ui/input";
-import { currencyISO_Codes } from "@/utils/constants";
 import {
   Command,
   CommandEmpty,
@@ -29,44 +28,21 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { currencyISO_Codes } from "@/utils/constants";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useUploadThing } from "@/utils/uploadthing";
-
-const currencyISO_CodesArray = currencyISO_Codes.map((c) => c.value) as [
-  string,
-  ...string[]
-];
-
-const onboardingFormSchema = z.object({
-  fName: z
-    .string()
-    .min(3, "Should contain at least 3 characters")
-    .max(20, "Should not contain more than 20 characters"),
-  lName: z
-    .string()
-    .min(3, "Should contain at least 3 characters")
-    .max(20, "Should not contain more than 20 characters"),
-  currency: z.enum(currencyISO_CodesArray, {
-    errorMap: () => ({ message: "Please select a valid currency" }),
-  }),
-  profilePicture: z
-    .instanceof(File)
-    .refine((file) => file.size <= 4 * 1024 * 1024, {
-      message: "Profile picture must be less than 4MB",
-    })
-    .refine((file) => file.type.startsWith("image/"), {
-      message: "File must be an image",
-    })
-    .optional()
-    .nullable(),
-});
+import {
+  onboardingFormSchema,
+  type onboardingFormSchemaType,
+} from "@/lib/zod-schema";
+import { createUserOnboarding } from "@/db/actions";
 
 export default function OnboardingForm() {
   const profilePictureRef = useRef<HTMLInputElement | null>(null);
+  const { startUpload, isUploading } = useUploadThing("imageUploader");
 
-  const router = useRouter();
   const form = useForm({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: {
@@ -77,30 +53,54 @@ export default function OnboardingForm() {
     },
   });
 
-  const { startUpload, isUploading } = useUploadThing("imageUploader");
+  const router = useRouter();
 
-  async function onSubmit(data: z.infer<typeof onboardingFormSchema>) {
-    /**
-     * 🛑
-     * Add functionality
-     * Update user metadata -> Set onboardingComplete to True
-     */
-    let profilePictureURL = null;
-
-    const fName = data.fName;
-    const lName = data.lName;
-    const currency = data.currency;
-    const profilePicture = data.profilePicture;
-
+  async function onSubmit(data: onboardingFormSchemaType) {
     try {
+      // Display a toast while function executes
+      const toastID = toast("Creating user...", {
+        description: "Please wait",
+        dismissible: true,
+        duration: Infinity,
+      });
+
+      let profilePictureURL: string | null = null;
+      const profilePicture = data.profilePicture;
+
       if (profilePicture) {
         // if no profilePicture was selected, defaults to null
         const ppUploadResult = await startUpload([profilePicture]);
         profilePictureURL = ppUploadResult?.[0]?.ufsUrl ?? null;
       }
-      // router.replace("/dashboard");
+
+      // pass the data to server
+      const result = await createUserOnboarding({
+        fName: data.fName,
+        lName: data.lName,
+        currency: data.currency,
+        profilePictureURL,
+      });
+
+      if (result.status === "error" || result.error) {
+        toast.error("Onboarding failed", {
+          description: result.error,
+        });
+
+        return;
+      }
+
+      toast.dismiss(toastID);
+
+      toast.success("Onboarding successful", {
+        description: "You will be redirected shortly",
+      });
+
+      router.replace("/dashboard");
     } catch (error) {
       console.error(JSON.stringify(error));
+      toast.error("Submission error", {
+        description: "Please try again later",
+      });
     }
   }
 
@@ -274,7 +274,7 @@ export default function OnboardingForm() {
               <Button
                 type="submit"
                 className="w-full bg-theme hover:bg-theme/90 active:bg-theme"
-                disabled={form.formState.isSubmitting}
+                disabled={form.formState.isSubmitting || isUploading}
               >
                 Finish
               </Button>

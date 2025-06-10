@@ -3,3 +3,4 @@ Cashly
 Chethaka
 uploadthing
 clientside
+sonner

@@ -1,17 +1,17 @@
 import { z, ZodType, ZodSchema } from "zod";
 import type { UseFormReturn, FieldValues } from "react-hook-form";
-import {
-  signUpFromSchema,
-  signInFromSchema,
-  onboardingFromSchema,
-} from "@/lib/zod-schema";
+// import {
+//   signUpFromSchema,
+//   signInFromSchema,
+//   onboardingFromSchema,
+// } from "@/lib/zod-schema";
 import { ClerkAPIError, OAuthStrategy } from "@clerk/types";
 
 export interface UserProps {
   userID: string;
   userName: string;
   currencyUnit: string;
-  joinedDate: Date;
+  // joinedDate: Date;
 }
 
 interface BaseTransaction {
@@ -64,4 +64,20 @@ export interface AuthFormProps<T extends FieldValues> {
   schema: ZodType<T>;
   defaultValues?: T;
   errors: (ClerkAPIError | string)[];
+}
+
+export interface CreateUserOnboardingProps {
+  // userID: string;
+  fName: string;
+  lName: string;
+  currency: string;
+  profilePictureURL: null | string;
+}
+
+export interface UserTable {
+  user_id: string;
+  f_name: string;
+  l_name: string;
+  currency: string;
+  profile_picture_url: string | null;
 }
