@@ -1,5 +1,5 @@
-import OnboardingForm from "@/components/onboarding-form";
+import UserDataFrom from "@/components/user-data-form";
 
 export default function OnboardingPage() {
-  return <OnboardingForm />;
+  return <UserDataFrom />;
 }

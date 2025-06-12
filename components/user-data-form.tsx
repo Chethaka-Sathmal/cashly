@@ -39,7 +39,7 @@ import {
 } from "@/lib/zod-schema";
 import { createUserOnboarding } from "@/db/actions";
 
-export default function OnboardingForm() {
+export default function UserDataForm() {
   const profilePictureRef = useRef<HTMLInputElement | null>(null);
   const { startUpload, isUploading } = useUploadThing("imageUploader");
 
