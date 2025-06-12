@@ -14,7 +14,7 @@ export default function Page({ children }: { children: React.ReactNode }) {
       <AppSidebar />
       <SidebarInset>
         <AppHeader />
-        <div className="p-2">{children}</div>
+        <div className="p-2 w-full">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

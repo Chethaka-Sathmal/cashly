@@ -2,8 +2,9 @@
 
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useUploadThing } from "@/utils/uploadthing";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -32,7 +33,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { currencyISO_Codes } from "@/utils/constants";
 import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
-import { useUploadThing } from "@/utils/uploadthing";
 import {
   onboardingFormSchema,
   type onboardingFormSchemaType,

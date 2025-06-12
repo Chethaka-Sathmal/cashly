@@ -81,3 +81,12 @@ export interface UserTable {
   currency: string;
   profile_picture_url: string | null;
 }
+
+export interface UserCardProps {
+  fName: string;
+  lName: string;
+  email: string;
+  currency: string;
+  profilePictureUrl: string;
+  className?: string;
+}
