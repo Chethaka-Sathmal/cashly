@@ -66,20 +66,22 @@ export interface AuthFormProps<T extends FieldValues> {
   errors: (ClerkAPIError | string)[];
 }
 
-export interface CreateUserOnboardingProps {
+export interface CreateUserOnboardingProps_func {
   // userID: string;
   fName: string;
   lName: string;
   currency: string;
   profilePictureURL: null | string;
+  profilePictureKey: null | string;
 }
 
-export interface UserTable {
+export interface UserTable_db {
   user_id: string;
   f_name: string;
   l_name: string;
   currency: string;
   profile_picture_url: string | null;
+  profile_picture_key: string | null;
 }
 
 export interface UserCardProps {
@@ -89,4 +91,26 @@ export interface UserCardProps {
   currency: string;
   profilePictureUrl: string;
   className?: string;
+}
+
+export interface UserDataFormProps_func {
+  title: string;
+  subTittle?: string;
+  buttonTitle: string;
+  fName?: string;
+  lName?: string;
+  currency?: string;
+  type: "create" | "edit";
+}
+
+export interface EditUserProfileProps_db {
+  f_name: string;
+  l_name: string;
+  currency: string;
+}
+
+export interface EditUserProfileProps_func {
+  fName: string;
+  lName: string;
+  currency: string;
 }

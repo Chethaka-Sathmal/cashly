@@ -17,11 +17,11 @@ export default async function Settings() {
   const result = await fetchUserInfo();
 
   const data = {
-    fName: result ? result.data.f_name : "",
-    lName: result ? result.data.l_name : "",
-    currency: result ? result.data.currency : "",
+    fName: result ? result.data?.f_name : "",
+    lName: result ? result.data?.l_name : "",
+    currency: result ? result.data?.currency : "",
     email: email ? email : "",
-    profilePictureUrl: result ? result.data.profile_picture_url : "",
+    profilePictureUrl: result ? result.data?.profile_picture_url : "",
   };
 
   return (

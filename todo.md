@@ -38,6 +38,7 @@
 
 - [ ] Add forgot password option
 - [ ] Make auth forms responsive for mobile
+- [ ] Update `createUserOnboarding` action to upload profile picture key as well
 
 # Errors
 

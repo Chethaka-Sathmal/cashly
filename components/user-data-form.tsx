@@ -32,30 +32,38 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { currencyISO_Codes } from "@/utils/constants";
-import { Check, ChevronsUpDown, Trash2 } from "lucide-react";
+import { AwardIcon, Check, ChevronsUpDown, Trash2 } from "lucide-react";
 import {
   onboardingFormSchema,
   type onboardingFormSchemaType,
 } from "@/lib/zod-schema";
-import { createUserOnboarding } from "@/db/actions";
+import { createUserOnboarding, editUserProfile } from "@/db/actions";
+import { UserDataFormProps_func } from "@/types";
 
-export default function UserDataForm() {
+export default function UserDataForm({
+  title,
+  subTittle,
+  type,
+  buttonTitle,
+  fName,
+  lName,
+  currency,
+}: UserDataFormProps_func) {
   const profilePictureRef = useRef<HTMLInputElement | null>(null);
   const { startUpload, isUploading } = useUploadThing("imageUploader");
+  const router = useRouter();
 
   const form = useForm({
     resolver: zodResolver(onboardingFormSchema),
     defaultValues: {
-      fName: "",
-      lName: "",
-      currency: "LKR",
+      fName: fName ? fName : "",
+      lName: lName ? lName : "",
+      currency: currency ? currency : "LKR",
       profilePicture: null,
     },
   });
 
-  const router = useRouter();
-
-  async function onSubmit(data: onboardingFormSchemaType) {
+  async function onSubmitCreate(data: onboardingFormSchemaType) {
     try {
       // Display a toast while function executes
       const toastID = toast("Creating user...", {
@@ -65,12 +73,14 @@ export default function UserDataForm() {
       });
 
       let profilePictureURL: string | null = null;
+      let profilePictureKey: string | null = null;
       const profilePicture = data.profilePicture;
 
       if (profilePicture) {
         // if no profilePicture was selected, defaults to null
         const ppUploadResult = await startUpload([profilePicture]);
         profilePictureURL = ppUploadResult?.[0]?.ufsUrl ?? null;
+        profilePictureKey = ppUploadResult?.[0]?.key ?? null;
       }
 
       // pass the data to server
@@ -79,7 +89,10 @@ export default function UserDataForm() {
         lName: data.lName,
         currency: data.currency,
         profilePictureURL,
+        profilePictureKey,
       });
+
+      toast.dismiss(toastID);
 
       if (result.status === "error" || result.error) {
         toast.error("Onboarding failed", {
@@ -88,8 +101,6 @@ export default function UserDataForm() {
 
         return;
       }
-
-      toast.dismiss(toastID);
 
       toast.success("Onboarding successful", {
         description: "You will be redirected shortly",
@@ -104,17 +115,54 @@ export default function UserDataForm() {
     }
   }
 
+  async function onSubmitEdit(data: onboardingFormSchemaType) {
+    try {
+      const toastID = toast("Updating user information", {
+        description: "Please wait...",
+      });
+
+      const result = await editUserProfile({
+        fName: data.fName,
+        lName: data.lName,
+        currency: data.currency,
+      });
+
+      toast.dismiss(toastID);
+
+      if (result.status === "error" || result.error) {
+        toast.error("Update failed", {
+          description: "Hello world",
+        });
+
+        return;
+      }
+
+      toast.success("Success", {
+        description: "Your profile updated successfully",
+      });
+
+      router.replace("/settings");
+    } catch (error) {
+      console.error(`User data form error: ${JSON.stringify(error)}`);
+    }
+  }
+
   return (
     <section className="flex justify-center items-center">
       <Card className="bg-white shadow-none w-lg">
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form
+              onSubmit={form.handleSubmit((data) =>
+                type === "create" ? onSubmitCreate(data) : onSubmitEdit(data)
+              )}
+              className="space-y-8"
+            >
               <div className="flex flex-col gap-6">
                 <div className="flex flex-col items-center text-center">
-                  <h1 className="text-3xl font-bold">Welcome aboard</h1>
+                  <h1 className="text-3xl font-bold">{title}</h1>
                   <p className="text-muted-foreground text-balance">
-                    Let's get things started
+                    {subTittle}
                   </p>
                 </div>
               </div>
@@ -228,55 +276,59 @@ export default function UserDataForm() {
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="profilePicture"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile picture</FormLabel>
-                    <FormControl>
-                      <div className="flex items-center justify-between gap-3">
-                        <Input
-                          id="profilePic"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => field.onChange(e.target.files?.[0])}
-                          name="profilePicture"
-                          className="shadow-none"
-                          ref={(el) => {
-                            field.ref(el);
-                            profilePictureRef.current = el;
-                          }}
-                        />
-                        <Button
-                          type="button"
-                          variant={"destructiveLight"}
-                          size={"icon"}
-                          className="border-1"
-                          onClick={() => {
-                            form.setValue("profilePicture", undefined, {
-                              shouldValidate: true,
-                            });
-
-                            if (profilePictureRef.current) {
-                              profilePictureRef.current.value = "";
+              {type === "create" && (
+                <FormField
+                  control={form.control}
+                  name="profilePicture"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Profile picture</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center justify-between gap-3">
+                          <Input
+                            id="profilePic"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) =>
+                              field.onChange(e.target.files?.[0])
                             }
-                          }}
-                        >
-                          <Trash2 />
-                        </Button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            name="profilePicture"
+                            className="shadow-none"
+                            ref={(el) => {
+                              field.ref(el);
+                              profilePictureRef.current = el;
+                            }}
+                          />
+                          <Button
+                            type="button"
+                            variant={"destructiveLight"}
+                            size={"icon"}
+                            className="border-1"
+                            onClick={() => {
+                              form.setValue("profilePicture", undefined, {
+                                shouldValidate: true,
+                              });
+
+                              if (profilePictureRef.current) {
+                                profilePictureRef.current.value = "";
+                              }
+                            }}
+                          >
+                            <Trash2 />
+                          </Button>
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <Button
                 type="submit"
                 className="w-full bg-theme hover:bg-theme/90 active:bg-theme"
                 disabled={form.formState.isSubmitting || isUploading}
               >
-                Finish
+                {buttonTitle}
               </Button>
             </form>
           </Form>
