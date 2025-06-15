@@ -6,6 +6,7 @@ import type { UseFormReturn, FieldValues } from "react-hook-form";
 //   onboardingFromSchema,
 // } from "@/lib/zod-schema";
 import { ClerkAPIError, OAuthStrategy } from "@clerk/types";
+import { QueryResultRow } from "pg";
 
 export interface UserProps {
   userID: string;
@@ -113,4 +114,10 @@ export interface EditUserProfileProps_func {
   fName: string;
   lName: string;
   currency: string;
+}
+
+export interface FooterInfoProps_db {
+  f_name: string;
+  l_name: string;
+  profile_picture_url: string;
 }
