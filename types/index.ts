@@ -121,3 +121,7 @@ export interface FooterInfoProps_db {
   l_name: string;
   profile_picture_url: string;
 }
+
+export interface UserNameProps_db {
+  f_name: string;
+}

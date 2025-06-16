@@ -1,6 +1,6 @@
 import DBquery from "./connection";
 import { auth } from "@clerk/nextjs/server";
-import { FooterInfoProps_db } from "@/types";
+import { FooterInfoProps_db, UserNameProps_db } from "@/types";
 
 export async function fetchUserInfo() {
   try {
@@ -64,10 +64,35 @@ export async function fetchFooterInfo() {
     });
 
     if (!result) return { status: "error", error: "Unknown error occurred" };
-    // console.log(`Query data: ${result[0].profile_picture_url}`);
     return { status: "success", data: result[0] };
   } catch (error) {
     console.error(`Error fetching footer information ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching data",
+    };
+  }
+}
+
+export async function fetchUserName() {
+  try {
+    const { userId } = await auth();
+    const queryString = `
+      SELECT f_name FROM users 
+      WHERE user_id = $1;
+    `;
+
+    const result = await DBquery<UserNameProps_db>({
+      text: queryString,
+      params: [userId],
+    });
+    if (!result) return { status: "error", error: "Unknown error occurred" };
+    return { status: "success", data: result[0] };
+  } catch (error) {
+    console.error(`Error fetching user name: ${JSON.stringify(error)}`);
     return {
       status: "error",
       error:
