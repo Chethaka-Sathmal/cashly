@@ -24,9 +24,9 @@ const buttonVariants = cva(
         theme:
           "bg-theme hover:bg-theme/90 active:bg-theme text-white disabled:bg-theme/60",
         destructiveLight:
-          "border-destructive bg-destructive/20 ring-[0.5px] hover:bg-destructive/30 text-destructive dark:hover:bg-destructive/20",
+          "ring-destructive bg-destructive/20 ring-[0.5px] hover:bg-destructive/30 text-destructive dark:hover:bg-destructive/20",
         themeLight:
-          "bg-theme/20 hover:bg-theme/30 text-theme border-theme ring-[0.5px]",
+          "bg-theme/20 hover:bg-theme/30 text-theme ring-theme ring-[0.5px]",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

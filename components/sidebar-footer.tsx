@@ -47,7 +47,7 @@ export default function SidebarFooterComponent() {
     <Link
       href={"/settings"}
       className={cn(
-        "flex items-center gap-4 p-3 bg-gray-100 rounded-md w-full",
+        "flex items-center gap-4 p-3 bg-gray-100 rounded-md w-full ring-sidebar-ring ring-[0.15px]",
         pathname === "/settings" && "ring-theme/30 ring-1 bg-theme/10"
       )}
     >

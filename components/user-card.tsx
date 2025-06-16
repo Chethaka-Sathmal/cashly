@@ -13,7 +13,7 @@ export default function UserCard({
 }: UserCardProps) {
   return (
     <section
-      className={`bg-white w-full rounded-lg px-2 py-4 md:p-2 ring-sidebar-ring ring-[0.1px] ${className}`}
+      className={`bg-white w-full rounded-lg px-2 py-4 md:p-2 ring-sidebar-ring ring-[0.15px] ${className}`}
     >
       <div className="flex flex-col md:flex-row items-center gap-5">
         <div className="w-40 h-40 overflow-hidden rounded-lg bg-gray-100">
