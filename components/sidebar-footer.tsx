@@ -25,7 +25,6 @@ export default function SidebarFooterComponent() {
 
         const result = await res.json();
         const data = result.data;
-        console.log(`From footer: ${JSON.stringify(data)}`);
         setUserInfo({
           fName: data.f_name,
           lName: data.l_name,
