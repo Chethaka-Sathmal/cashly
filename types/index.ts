@@ -1,12 +1,6 @@
 import { z, ZodType, ZodSchema } from "zod";
 import type { UseFormReturn, FieldValues } from "react-hook-form";
-// import {
-//   signUpFromSchema,
-//   signInFromSchema,
-//   onboardingFromSchema,
-// } from "@/lib/zod-schema";
 import { ClerkAPIError, OAuthStrategy } from "@clerk/types";
-import { QueryResultRow } from "pg";
 
 export interface UserProps {
   userID: string;
@@ -15,43 +9,39 @@ export interface UserProps {
   // joinedDate: Date;
 }
 
-interface BaseTransaction {
+export interface TransactionProps {
   transactionID: string;
   userID: string;
   amountInCents: number;
   type: "income" | "expense";
+  category: number;
   createdDate: Date;
   transactionDate: Date;
   description: string;
 }
 
-type IncomeCategory =
-  | "salary"
-  | "freelance"
-  | "investments"
-  | "gifts"
-  | "other";
+// type IncomeCategory = 1 | 2 | 3 | 4 | 5;
 
-type ExpenseCategory =
-  | "food"
-  | "transport"
-  | "shopping"
-  | "entertainment"
-  | "bills"
-  | "health"
-  | "other";
+// type ExpenseCategory =
+//   | "food"
+//   | "transport"
+//   | "shopping"
+//   | "entertainment"
+//   | "bills"
+//   | "health"
+//   | "other";
 
-interface IncomeTransaction extends BaseTransaction {
-  type: "income";
-  category: IncomeCategory;
-}
+// interface IncomeTransaction extends BaseTransaction {
+//   type: "income";
+//   category: IncomeCategory;
+// }
 
-interface ExpenseTransaction extends BaseTransaction {
-  type: "expense";
-  category: ExpenseCategory;
-}
+// interface ExpenseTransaction extends BaseTransaction {
+//   type: "expense";
+//   category: ExpenseCategory;
+// }
 
-export type TransactionProps = IncomeTransaction | ExpenseTransaction;
+// export type TransactionProps = IncomeTransaction | ExpenseTransaction;
 
 // export type SignUpFromSchemaProps = z.infer<typeof signUpFromSchema>;
 // export type SignInFromSchemaProps = z.infer<typeof signInFromSchema>;
