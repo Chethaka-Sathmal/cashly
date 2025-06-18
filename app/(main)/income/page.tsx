@@ -1,3 +1,9 @@
+import QueryBar from "@/components/query-bar";
+
 export default function Income() {
-  return <div>Income</div>;
+  return (
+    <div>
+      <QueryBar />
+    </div>
+  );
 }
