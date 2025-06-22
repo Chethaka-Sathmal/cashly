@@ -53,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   key={item.title}
                   className={cn(
                     item.url === pathName
-                      ? "bg-theme/10 hover:bg-theme/20 rounded-md"
+                      ? "bg-theme/20 hover:bg-theme/20 rounded-md"
                       : null
                   )}
                 >

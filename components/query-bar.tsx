@@ -4,6 +4,7 @@ import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useDebouncedCallback } from "use-debounce";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Plus } from "lucide-react";
 
 const QueryBarSchema = z.object({
   search: z.string(),
@@ -34,21 +36,22 @@ export default function QueryBar() {
     },
   });
 
-  function handleSearch(data: string) {
-    if (data) {
-      params.set("query", data);
+  const handleSearch = useDebouncedCallback((term) => {
+    const params = new URLSearchParams(searchParams);
+    if (term) {
+      params.set("query", term);
     } else {
       params.delete("query");
     }
     router.replace(`${pathname}?${params.toString()}`);
-  }
+  }, 300);
 
   function onSubmit(data: QueryBarData) {
     handleSearch(data.search);
   }
 
   return (
-    <section className="flex mx-auto gap-2 max-w-3xl">
+    <section className="flex mx-auto gap-2 max-w-3xl mb-6 md:mt-6 md:mb-10">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -64,6 +67,7 @@ export default function QueryBar() {
                     <Input
                       className="bg-white shadow-none w-full"
                       placeholder="Search..."
+                      defaultValue={searchParams.get("query")?.toString()}
                       {...field}
                       onChange={(e) => {
                         field.onChange(e); // update RHF state
@@ -85,7 +89,12 @@ export default function QueryBar() {
           </Button>
         </form>
       </Form>
-      <Button variant="theme">
+      <Button
+        variant="theme"
+        onClick={() => router.push("/create-transaction")}
+        className="flex flex-row gap-1"
+      >
+        <Plus />
         Add <span className="hidden md:block">transaction</span>
       </Button>
     </section>

@@ -115,3 +115,15 @@ export interface FooterInfoProps_db {
 export interface UserNameProps_db {
   f_name: string;
 }
+
+export interface FetchIncomeData_db {
+  transaction_id: string;
+  transaction_date: Date;
+  amount_cents: number;
+  category: string;
+  description: string;
+}
+
+export interface FetchCurrency_db {
+  currency: string;
+}
