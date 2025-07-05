@@ -5,6 +5,7 @@ import {
   UserNameProps_db,
   FetchIncomeData_db,
   FetchCurrency_db,
+  fetchCategories_db,
 } from "@/types";
 
 export async function fetchUserInfo() {
@@ -179,6 +180,34 @@ export async function fetchCurrencyMethod() {
     return { status: "success", data: result[0] };
   } catch (error) {
     console.error(`Error fetching currency: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching data",
+    };
+  }
+}
+
+export async function fetchCategories({ type }: { type: string }) {
+  try {
+    const { userId } = await auth();
+    const queryString = `
+      SELECT category 
+      FROM categories
+      WHERE type = $1 AND (user_id = $2 OR user_id = $3);
+    `;
+
+    const result = await DBquery<fetchCategories_db>({
+      text: queryString,
+      params: [type, userId, "system"],
+    });
+
+    if (!result) return { status: "error", error: "Unknown error occurred" };
+    return { status: "success", data: result };
+  } catch (error) {
+    console.error(`Error fetching categories: ${JSON.stringify(error)}`);
     return {
       status: "error",
       error:

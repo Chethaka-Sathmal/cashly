@@ -7,6 +7,7 @@ import {
   UserTable_db,
   EditUserProfileProps_func,
   EditUserProfileProps_db,
+  CreateNewTransaction_func,
 } from "@/types";
 
 export async function createUserOnboarding({
@@ -99,6 +100,32 @@ export async function editUserProfile({
         error instanceof Error
           ? error.message.toString()
           : "Updating user failed",
+    };
+  }
+}
+
+export async function createNewTransaction({
+  amount,
+  category,
+  transactionDate,
+  description,
+}: CreateNewTransaction_func) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("User not authenticated");
+
+    console.log(`amount: ${amount}`);
+    console.log(`category: ${category}`);
+    console.log(`transactionDate: ${transactionDate}`);
+    console.log(`description: ${description}`);
+  } catch (error) {
+    console.error(`Database error recording new transaction: ${error}`);
+    return {
+      status: "error" as const,
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "New transaction entry failed",
     };
   }
 }

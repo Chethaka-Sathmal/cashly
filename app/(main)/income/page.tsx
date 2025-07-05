@@ -30,7 +30,7 @@ export default async function Income(props: {
 
   return (
     <div>
-      <QueryBar />
+      <QueryBar type="income" />
       <TransactionTable
         data={result_1.data}
         type="income"

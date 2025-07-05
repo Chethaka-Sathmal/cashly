@@ -127,3 +127,14 @@ export interface FetchIncomeData_db {
 export interface FetchCurrency_db {
   currency: string;
 }
+
+export interface fetchCategories_db {
+  category: string;
+}
+
+export interface CreateNewTransaction_func {
+  amount: number;
+  category: string;
+  transactionDate: Date;
+  description: string | undefined;
+}

@@ -23,7 +23,7 @@ const QueryBarSchema = z.object({
 
 type QueryBarData = z.infer<typeof QueryBarSchema>;
 
-export default function QueryBar() {
+export default function QueryBar({ type }: { type: string }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -91,7 +91,7 @@ export default function QueryBar() {
       </Form>
       <Button
         variant="theme"
-        onClick={() => router.push("/create-transaction")}
+        onClick={() => router.push(`/create-transaction?type=${type}`)}
         className="flex flex-row gap-1"
       >
         <Plus />

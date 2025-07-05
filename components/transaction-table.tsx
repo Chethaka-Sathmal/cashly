@@ -22,7 +22,7 @@ export default function TransactionTable({
 }) {
   let index = 0; // table row number
 
-  console.log(`data: ${JSON.stringify(data)}`);
+  // console.log(`data: ${JSON.stringify(data)}`);
 
   return (
     <div className="bg-white rounded-lg ring-sidebar-ring ring-[0.1px]">
