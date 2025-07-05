@@ -8,7 +8,6 @@ export default async function CreateTransaction() {
 
   return (
     <TransactionForm
-      title="Add income"
       currency={currency.data?.currency}
       categories={categories}
     />

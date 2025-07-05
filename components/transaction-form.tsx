@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -52,17 +52,17 @@ const transactionFormSchema = z.object({
 });
 
 export default function TransactionForm({
-  title,
   currency,
   categories,
 }: {
-  title: string;
   currency: string | undefined;
   categories: string[] | undefined;
 }) {
   const [date, setDate] = useState<Date>();
   const [descriptionL, setDescriptionL] = useState(0);
   const router = useRouter();
+  const pathname = usePathname();
+  const type = pathname.slice(1, pathname.lastIndexOf("/"));
 
   const form = useForm({
     resolver: zodResolver(transactionFormSchema),
@@ -115,7 +115,7 @@ export default function TransactionForm({
   return (
     <Card className="max-w-2xl mx-auto md:mt-16">
       <CardHeader className="text-center text-3xl font-semibold hidden md:block">
-        {title}
+        Create {type}
       </CardHeader>
       <CardContent>
         <Form {...form}>
