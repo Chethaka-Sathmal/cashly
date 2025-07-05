@@ -5,7 +5,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useDebouncedCallback } from "use-debounce";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,11 +22,15 @@ const QueryBarSchema = z.object({
 
 type QueryBarData = z.infer<typeof QueryBarSchema>;
 
-export default function QueryBar({ type }: { type: string }) {
+export default function QueryBar() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   const params = new URLSearchParams(searchParams);
+  let type: "income" | "expense";
+  if (pathname.startsWith("/")) {
+    type = pathname.slice(1) as "income" | "expense";
+  }
 
   const form = useForm<QueryBarData>({
     resolver: zodResolver(QueryBarSchema),
@@ -91,7 +94,7 @@ export default function QueryBar({ type }: { type: string }) {
       </Form>
       <Button
         variant="theme"
-        onClick={() => router.push(`/create-transaction?type=${type}`)}
+        onClick={() => router.push(`/${type}/create-transaction`)}
         className="flex flex-row gap-1"
       >
         <Plus />
