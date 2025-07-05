@@ -9,6 +9,7 @@ import {
   EditUserProfileProps_db,
   CreateNewTransaction_func,
 } from "@/types";
+import { getCategoryId } from "./query";
 
 export async function createUserOnboarding({
   fName,
@@ -109,15 +110,55 @@ export async function createNewTransaction({
   category,
   transactionDate,
   description,
+  type,
 }: CreateNewTransaction_func) {
   try {
     const { userId } = await auth();
     if (!userId) throw new Error("User not authenticated");
 
-    console.log(`amount: ${amount}`);
-    console.log(`category: ${category}`);
-    console.log(`transactionDate: ${transactionDate}`);
-    console.log(`description: ${description}`);
+    // 1. Get category_id from categories table
+    const categoryResult = await getCategoryId({
+      category,
+      type,
+      userId,
+    });
+
+    if (categoryResult.status === "error") {
+      throw new Error(categoryResult.error);
+    }
+
+    const categoryId = categoryResult.data;
+
+    // 2. Insert transaction into transactions table
+    const transactionQueryString = `
+      INSERT INTO transactions (user_id, amount_cents, type, category_id, created_date, transaction_date, description)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *;
+    `;
+
+    const amountInCents = Math.round(amount * 100);
+    const currentDate = new Date();
+
+    const result = await DBquery({
+      text: transactionQueryString,
+      params: [
+        userId,
+        amountInCents,
+        type,
+        categoryId,
+        currentDate,
+        transactionDate,
+        description || null,
+      ],
+    });
+
+    if (!result?.length) throw new Error("Transaction creation failed");
+
+    // 3. Return success
+    return {
+      status: "success" as const,
+      data: result[0],
+    };
   } catch (error) {
     console.error(`Database error recording new transaction: ${error}`);
     return {

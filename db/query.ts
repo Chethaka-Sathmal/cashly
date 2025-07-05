@@ -217,3 +217,44 @@ export async function fetchCategories({ type }: { type: string }) {
     };
   }
 }
+
+export async function getCategoryId({
+  category,
+  type,
+  userId,
+}: {
+  category: string;
+  type: string;
+  userId: string;
+}) {
+  try {
+    const queryString = `
+      SELECT category_id 
+      FROM categories
+      WHERE category = $1 AND type = $2 AND (user_id = $3 OR user_id = $4);
+    `;
+
+    const result = await DBquery<{ category_id: number }>({
+      text: queryString,
+      params: [category, type, userId, "system"],
+    });
+
+    if (!result?.length) {
+      throw new Error("Category not found");
+    }
+
+    return {
+      status: "success" as const,
+      data: result[0].category_id,
+    };
+  } catch (error) {
+    console.error(`Error fetching category ID: ${error}`);
+    return {
+      status: "error" as const,
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Failed to fetch category ID",
+    };
+  }
+}

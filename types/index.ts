@@ -137,4 +137,5 @@ export interface CreateNewTransaction_func {
   category: string;
   transactionDate: Date;
   description: string | undefined;
+  type: "income" | "expense";
 }

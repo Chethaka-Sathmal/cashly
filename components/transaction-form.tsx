@@ -62,7 +62,10 @@ export default function TransactionForm({
   const [descriptionL, setDescriptionL] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
-  const type = pathname.slice(1, pathname.lastIndexOf("/"));
+  const type: "income" | "expense" = pathname.slice(
+    1,
+    pathname.lastIndexOf("/")
+  ) as "income" | "expense";
 
   const form = useForm({
     resolver: zodResolver(transactionFormSchema),
@@ -90,6 +93,7 @@ export default function TransactionForm({
         category: data.category,
         transactionDate: new Date(data.transactionDate),
         description: data.description,
+        type: type,
       });
 
       toast.dismiss(toastID);
