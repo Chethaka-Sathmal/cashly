@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -19,6 +19,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { FetchIncomeData_db } from "@/types";
 import formatDate from "@/utils/format-date";
 import { Trash2, PencilLine } from "lucide-react";
@@ -27,11 +36,17 @@ import { toast } from "sonner";
 export default function TransactionTable({
   data,
   currency,
+  totalCount,
+  currentPage,
+  pageSize = 12,
 }: {
   data: FetchIncomeData_db[] | undefined;
   currency: string | undefined;
+  totalCount: number;
+  currentPage: number;
+  pageSize?: number;
 }) {
-  let index = 0; // table row number
+  let index = (currentPage - 1) * pageSize; // table row number
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
     null
@@ -39,7 +54,10 @@ export default function TransactionTable({
   const [isDeleting, setIsDeleting] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const type = pathname.split("/")[1];
+
+  const totalPages = Math.ceil(totalCount / pageSize);
 
   function deleteEntry(transaction_id: string) {
     setTransactionToDelete(transaction_id);
@@ -48,6 +66,49 @@ export default function TransactionTable({
 
   function editEntry(transaction_id: string) {
     router.push(`/${type}/update?transaction_id=${transaction_id}`);
+  }
+
+  function handlePageChange(page: number) {
+    if (page < 1 || page > totalPages) return;
+
+    const params = new URLSearchParams(searchParams);
+    params.set("page", page.toString());
+    router.push(`${pathname}?${params.toString()}`);
+  }
+
+  function generatePageNumbers() {
+    const pages = [];
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 3) {
+        for (let i = 1; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
+      } else {
+        pages.push(1);
+        pages.push("...");
+        for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
+
+    return pages;
   }
 
   async function confirmDelete() {
@@ -95,7 +156,7 @@ export default function TransactionTable({
 
   return (
     <>
-      <div className="bg-white rounded-lg ring-sidebar-ring ring-[0.1px]">
+      <div className="bg-white rounded-lg ring-sidebar-ring ring-[0.1px] mb-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -158,6 +219,60 @@ export default function TransactionTable({
           </TableBody>
         </Table>
       </div>
+
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(currentPage - 1);
+              }}
+              className={
+                currentPage === 1
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer"
+              }
+            />
+          </PaginationItem>
+
+          {generatePageNumbers().map((page, index) => (
+            <PaginationItem key={index}>
+              {page === "..." ? (
+                <PaginationEllipsis />
+              ) : (
+                <PaginationLink
+                  href="#"
+                  isActive={currentPage === page}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handlePageChange(page as number);
+                  }}
+                  className="cursor-pointer bg-white"
+                >
+                  {page}
+                </PaginationLink>
+              )}
+            </PaginationItem>
+          ))}
+
+          <PaginationItem>
+            <PaginationNext
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handlePageChange(currentPage + 1);
+              }}
+              className={
+                currentPage === totalPages
+                  ? "pointer-events-none opacity-50"
+                  : "cursor-pointer"
+              }
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>

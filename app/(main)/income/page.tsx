@@ -1,8 +1,10 @@
 import QueryBar from "@/components/query-bar";
 import TransactionTable from "@/components/transaction-table";
-import PaginationComponent from "@/components/pagination";
-import { fetchCurrencyMethod, fetchIncomeData } from "@/db/query";
-import { toast } from "sonner";
+import {
+  fetchCurrencyMethod,
+  fetchIncomeData,
+  fetchIncomeDataCount,
+} from "@/db/query";
 
 export default async function Income(props: {
   searchParams?: Promise<{
@@ -13,19 +15,24 @@ export default async function Income(props: {
   const searchParams = await props.searchParams;
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
+  const pageSize = 12;
 
-  const result_1 = await fetchIncomeData({ query, currentPage });
-  const result_2 = await fetchCurrencyMethod();
+  const [result_1, result_2, result_3] = await Promise.all([
+    fetchIncomeData({ query, currentPage, pageSize }),
+    fetchCurrencyMethod(),
+    fetchIncomeDataCount({ query }),
+  ]);
 
-  if (
-    !result_1 ||
-    result_1.status === "error" ||
-    !result_2 ||
-    result_2.status === "error"
-  ) {
-    toast.error("Error fetching income data", {
-      description: result_1.error,
-    });
+  if (result_1.status === "error") {
+    throw new Error(result_1.error);
+  }
+
+  if (result_2.status === "error") {
+    throw new Error(result_2.error);
+  }
+
+  if (result_3.status === "error") {
+    throw new Error(result_3.error);
   }
 
   return (
@@ -34,8 +41,13 @@ export default async function Income(props: {
       <TransactionTable
         data={result_1.data}
         currency={result_2.data?.currency}
+        totalCount={result_3.data || 0}
+        currentPage={currentPage}
+        pageSize={pageSize}
+        // onPageChange={(page) => {
+        //   // This will be handled by the client component
+        // }}
       />
-      <PaginationComponent />
     </div>
   );
 }

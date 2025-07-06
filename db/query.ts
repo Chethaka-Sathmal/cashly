@@ -112,14 +112,18 @@ export async function fetchUserName() {
 export async function fetchIncomeData({
   query,
   currentPage,
+  pageSize = 12,
 }: {
   query: string;
   currentPage: number;
+  pageSize?: number;
 }) {
   console.log(`query: ${query}`);
   console.log(`currentPage: ${currentPage}`);
   try {
     const { userId } = await auth();
+    const offset = (currentPage - 1) * pageSize;
+    
     const queryString = `
 SELECT
   t.transaction_id,
@@ -140,12 +144,12 @@ WHERE t.user_id = $1
     )
   )
 ORDER BY t.transaction_date DESC
-LIMIT 15;
+LIMIT $4 OFFSET $5;
       `;
 
     const result = await DBquery<FetchIncomeData_db>({
       text: queryString,
-      params: [userId, "income", query],
+      params: [userId, "income", query, pageSize, offset],
     });
 
     if (!result) return { status: "error", error: "Unknown error occurred" };
@@ -158,6 +162,48 @@ LIMIT 15;
         error instanceof Error
           ? error.message.toString()
           : "Error fetching data",
+    };
+  }
+}
+
+export async function fetchIncomeDataCount({
+  query,
+}: {
+  query: string;
+}) {
+  try {
+    const { userId } = await auth();
+    
+    const queryString = `
+SELECT COUNT(*) as total
+FROM transactions t
+JOIN categories c ON t.category_id = c.category_id
+WHERE t.user_id = $1
+  AND t.type = $2
+  AND (
+    $3 = '' OR (
+      t.amount_cents::text ILIKE $3 OR
+      c.category ILIKE $3 OR
+      t.description ILIKE $3
+    )
+  );
+      `;
+
+    const result = await DBquery<{ total: string }>({
+      text: queryString,
+      params: [userId, "income", query],
+    });
+
+    if (!result?.length) return { status: "error", error: "Unknown error occurred" };
+    return { status: "success", data: parseInt(result[0].total) };
+  } catch (error) {
+    console.error(`Error fetching income data count: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching data count",
     };
   }
 }
@@ -298,6 +344,105 @@ export async function fetchTransactionById({
         error instanceof Error
           ? error.message.toString()
           : "Error fetching transaction",
+    };
+  }
+}
+
+export async function fetchExpenseData({
+  query,
+  currentPage,
+  pageSize = 12,
+}: {
+  query: string;
+  currentPage: number;
+  pageSize?: number;
+}) {
+  console.log(`query: ${query}`);
+  console.log(`currentPage: ${currentPage}`);
+  try {
+    const { userId } = await auth();
+    const offset = (currentPage - 1) * pageSize;
+    
+    const queryString = `
+SELECT
+  t.transaction_id,
+  t.transaction_date,
+  t.amount_cents,
+  t.category_id,
+  c.category,
+  t.description
+FROM transactions t
+JOIN categories c ON t.category_id = c.category_id
+WHERE t.user_id = $1
+  AND t.type = $2
+  AND (
+    $3 = '' OR (
+      t.amount_cents::text ILIKE $3 OR
+      c.category ILIKE $3 OR
+      t.description ILIKE $3
+    )
+  )
+ORDER BY t.transaction_date DESC
+LIMIT $4 OFFSET $5;
+      `;
+
+    const result = await DBquery<FetchIncomeData_db>({
+      text: queryString,
+      params: [userId, "expense", query, pageSize, offset],
+    });
+
+    if (!result) return { status: "error", error: "Unknown error occurred" };
+    return { status: "success", data: result };
+  } catch (error) {
+    console.error(`Error fetching expense data: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching data",
+    };
+  }
+}
+
+export async function fetchExpenseDataCount({
+  query,
+}: {
+  query: string;
+}) {
+  try {
+    const { userId } = await auth();
+    
+    const queryString = `
+SELECT COUNT(*) as total
+FROM transactions t
+JOIN categories c ON t.category_id = c.category_id
+WHERE t.user_id = $1
+  AND t.type = $2
+  AND (
+    $3 = '' OR (
+      t.amount_cents::text ILIKE $3 OR
+      c.category ILIKE $3 OR
+      t.description ILIKE $3
+    )
+  );
+      `;
+
+    const result = await DBquery<{ total: string }>({
+      text: queryString,
+      params: [userId, "expense", query],
+    });
+
+    if (!result?.length) return { status: "error", error: "Unknown error occurred" };
+    return { status: "success", data: parseInt(result[0].total) };
+  } catch (error) {
+    console.error(`Error fetching expense data count: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching data count",
     };
   }
 }
