@@ -30,10 +30,9 @@ export default async function Income(props: {
 
   return (
     <div>
-      <QueryBar type="income" />
+      <QueryBar />
       <TransactionTable
         data={result_1.data}
-        type="income"
         currency={result_2.data?.currency}
       />
       <PaginationComponent />

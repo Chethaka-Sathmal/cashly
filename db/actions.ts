@@ -170,3 +170,43 @@ export async function createNewTransaction({
     };
   }
 }
+
+export async function deleteTransaction({
+  transactionId,
+}: {
+  transactionId: string;
+}) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("User not authenticated");
+
+    const queryString = `
+      DELETE FROM transactions
+      WHERE transaction_id = $1 AND user_id = $2
+      RETURNING *;
+    `;
+
+    const result = await DBquery({
+      text: queryString,
+      params: [transactionId, userId],
+    });
+
+    if (!result?.length) {
+      throw new Error("Transaction not found or unauthorized");
+    }
+
+    return {
+      status: "success" as const,
+      data: result[0],
+    };
+  } catch (error) {
+    console.error(`Database error deleting transaction: ${error}`);
+    return {
+      status: "error" as const,
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Failed to delete transaction",
+    };
+  }
+}

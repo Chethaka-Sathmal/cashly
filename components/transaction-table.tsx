@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { usePathname } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -7,74 +11,170 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "./ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { FetchIncomeData_db } from "@/types";
 import formatDate from "@/utils/format-date";
 import { Trash2, PencilLine } from "lucide-react";
+import { toast } from "sonner";
 
 export default function TransactionTable({
   data,
-  type,
   currency,
 }: {
   data: FetchIncomeData_db[] | undefined;
-  type: string;
   currency: string | undefined;
 }) {
   let index = 0; // table row number
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState<string | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
+  const pathname = usePathname();
+  const type = pathname.split("/");
 
-  // console.log(`data: ${JSON.stringify(data)}`);
+  function deleteEntry(transaction_id: string) {
+    setTransactionToDelete(transaction_id);
+    setIsDeleteDialogOpen(true);
+  }
+
+  async function confirmDelete() {
+    if (!transactionToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      const response = await fetch("/api/delete-transaction", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ transactionId: transactionToDelete }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to delete transaction");
+      }
+
+      toast.success("Transaction deleted successfully");
+
+      // Close dialog and reset state
+      setIsDeleteDialogOpen(false);
+      setTransactionToDelete(null);
+
+      // Refresh the page to show updated data
+      window.location.reload();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete transaction", {
+        description:
+          error instanceof Error ? error.message : "An error occurred",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  }
+
+  function cancelDelete() {
+    setIsDeleteDialogOpen(false);
+    setTransactionToDelete(null);
+  }
 
   return (
-    <div className="bg-white rounded-lg ring-sidebar-ring ring-[0.1px]">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-left">#</TableHead>
-            <TableHead className="text-center">Date</TableHead>
-            <TableHead className="text-right w-[40px]">
-              Amount ({currency})
-            </TableHead>
-            <TableHead className="hidden md:table-cell">Type</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead className="hidden md:table-cell">Description</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data && data.length > 0 ? (
-            data?.map((i) => (
-              <TableRow key={i.transaction_id}>
-                <TableCell className="text-left">{++index}</TableCell>
-                <TableCell>{formatDate(i.transaction_date)}</TableCell>
-                <TableCell className="text-right w-[40px]">
-                  {(i.amount_cents / 100).toFixed(2)}
-                </TableCell>
-                <TableCell className="hidden md:block">{type}</TableCell>
-                <TableCell>{i.category}</TableCell>
-                <TableCell className="hidden md:block">
-                  {i.description}
-                </TableCell>
-                <TableCell className="hidden md:table-cell">
-                  <div className="flex gap-5">
-                    <Button size={"sm"} variant={"themeLight"}>
-                      <PencilLine />
-                    </Button>
-                    <Button size={"sm"} variant={"destructiveLight"}>
-                      <Trash2 />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          ) : (
-            <TableCell colSpan={7}>
-              <div className="flex flex-col items-center gap-4 w-full py-12">
-                <h2 className="text-3xl">Oopsie daisy 🥀</h2>
-                <p className="text-lg">No transaction records found</p>
-              </div>
-            </TableCell>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <>
+      <div className="bg-white rounded-lg ring-sidebar-ring ring-[0.1px]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-left">#</TableHead>
+              <TableHead className="text-center">Date</TableHead>
+              <TableHead className="text-right w-[40px]">
+                Amount ({currency})
+              </TableHead>
+              <TableHead className="hidden md:table-cell">Type</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead className="hidden md:table-cell">
+                Description
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data && data.length > 0 ? (
+              data?.map((i) => (
+                <TableRow key={i.transaction_id}>
+                  <TableCell className="text-left">{++index}</TableCell>
+                  <TableCell>{formatDate(i.transaction_date)}</TableCell>
+                  <TableCell className="text-right w-[40px]">
+                    {(i.amount_cents / 100).toFixed(2)}
+                  </TableCell>
+                  <TableCell className="hidden md:block">{type}</TableCell>
+                  <TableCell>{i.category}</TableCell>
+                  <TableCell className="hidden md:block">
+                    {i.description}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell">
+                    <div className="flex gap-5">
+                      <Button size={"sm"} variant={"themeLight"}>
+                        <PencilLine />
+                      </Button>
+                      <Button
+                        onClick={() => deleteEntry(i.transaction_id)}
+                        size={"sm"}
+                        variant={"destructiveLight"}
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableCell colSpan={7}>
+                <div className="flex flex-col items-center gap-4 w-full py-12">
+                  <h2 className="text-3xl">Oopsie daisy 🥀</h2>
+                  <p className="text-lg">No transaction records found</p>
+                </div>
+              </TableCell>
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Transaction</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this transaction? This action
+              cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={cancelDelete}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
