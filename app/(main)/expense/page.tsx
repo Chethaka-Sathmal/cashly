@@ -1,6 +1,6 @@
 import QueryBar from "@/components/query-bar";
 import TransactionTable from "@/components/transaction-table";
-import { fetchCurrencyMethod, fetchExpenseData, fetchExpenseDataCount } from "@/db/query";
+import { fetchCurrencyMethod, fetchTableData, fetchRowCount } from "@/db/query";
 
 export default async function Expense(props: {
   searchParams?: Promise<{
@@ -14,9 +14,14 @@ export default async function Expense(props: {
   const pageSize = 12;
 
   const [result_1, result_2, result_3] = await Promise.all([
-    fetchExpenseData({ query, currentPage, pageSize }),
+    fetchTableData({
+      query,
+      currentPage,
+      type: "expense",
+      pageSize,
+    }),
     fetchCurrencyMethod(),
-    fetchExpenseDataCount({ query }),
+    fetchRowCount({ query, type: "expense" }),
   ]);
 
   if (result_1.status === "error") {

@@ -109,13 +109,15 @@ export async function fetchUserName() {
   }
 }
 
-export async function fetchIncomeData({
+export async function fetchTableData({
   query,
   currentPage,
+  type,
   pageSize = 12,
 }: {
   query: string;
   currentPage: number;
+  type: "income" | "expense";
   pageSize?: number;
 }) {
   console.log(`query: ${query}`);
@@ -159,7 +161,7 @@ export async function fetchIncomeData({
 
     const result = await DBquery<FetchIncomeData_db>({
       text: queryString,
-      params: [userId, "income", query, pageSize, offset],
+      params: [userId, type, query, pageSize, offset],
     });
 
     if (!result) return { status: "error", error: "Unknown error occurred" };
@@ -176,7 +178,13 @@ export async function fetchIncomeData({
   }
 }
 
-export async function fetchIncomeDataCount({ query }: { query: string }) {
+export async function fetchRowCount({
+  query,
+  type,
+}: {
+  query: string;
+  type: "income" | "expense";
+}) {
   try {
     const { userId } = await auth();
 
@@ -200,7 +208,7 @@ export async function fetchIncomeDataCount({ query }: { query: string }) {
 
     const result = await DBquery<{ total: string }>({
       text: queryString,
-      params: [userId, "income", query],
+      params: [userId, type, query],
     });
 
     if (!result?.length)
