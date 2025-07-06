@@ -210,3 +210,79 @@ export async function deleteTransaction({
     };
   }
 }
+
+export async function updateTransaction({
+  transactionId,
+  amount,
+  category,
+  transactionDate,
+  description,
+  type,
+}: {
+  transactionId: string;
+  amount: number;
+  category: string;
+  transactionDate: Date;
+  description: string | undefined;
+  type: "income" | "expense";
+}) {
+  try {
+    const { userId } = await auth();
+    if (!userId) throw new Error("User not authenticated");
+
+    // 1. Get category_id from categories table
+    const categoryResult = await getCategoryId({
+      category,
+      type,
+      userId,
+    });
+
+    if (categoryResult.status === "error") {
+      throw new Error(categoryResult.error);
+    }
+
+    const categoryId = categoryResult.data;
+
+    // 2. Update transaction in transactions table
+    const transactionQueryString = `
+      UPDATE transactions 
+      SET amount_cents = $1, type = $2, category_id = $3, transaction_date = $4, description = $5
+      WHERE transaction_id = $6 AND user_id = $7
+      RETURNING *;
+    `;
+
+    const amountInCents = Math.round(amount * 100);
+
+    const result = await DBquery({
+      text: transactionQueryString,
+      params: [
+        amountInCents,
+        type,
+        categoryId,
+        transactionDate,
+        description || null,
+        transactionId,
+        userId,
+      ],
+    });
+
+    if (!result?.length) {
+      throw new Error("Transaction not found or unauthorized");
+    }
+
+    // 3. Return success
+    return {
+      status: "success" as const,
+      data: result[0],
+    };
+  } catch (error) {
+    console.error(`Database error updating transaction: ${error}`);
+    return {
+      status: "error" as const,
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Failed to update transaction",
+    };
+  }
+}

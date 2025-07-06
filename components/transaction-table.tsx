@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -38,11 +38,16 @@ export default function TransactionTable({
   );
   const [isDeleting, setIsDeleting] = useState(false);
   const pathname = usePathname();
-  const type = pathname.split("/");
+  const router = useRouter();
+  const type = pathname.split("/")[1];
 
   function deleteEntry(transaction_id: string) {
     setTransactionToDelete(transaction_id);
     setIsDeleteDialogOpen(true);
+  }
+
+  function editEntry(transaction_id: string) {
+    router.push(`/${type}/update?transaction_id=${transaction_id}`);
   }
 
   async function confirmDelete() {
@@ -122,9 +127,15 @@ export default function TransactionTable({
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     <div className="flex gap-5">
-                      <Button size={"sm"} variant={"themeLight"}>
+                      {/* Update button */}
+                      <Button
+                        size={"sm"}
+                        variant={"themeLight"}
+                        onClick={() => editEntry(i.transaction_id)}
+                      >
                         <PencilLine />
                       </Button>
+                      {/* Delete button */}
                       <Button
                         onClick={() => deleteEntry(i.transaction_id)}
                         size={"sm"}

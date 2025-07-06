@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, ChevronsUpDown, Check } from "lucide-react";
@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "./ui/textarea";
 import { Input } from "@/components/ui/input";
-import { createNewTransaction } from "@/db/actions";
+import { createNewTransaction, updateTransaction } from "@/db/actions";
 import { toast } from "sonner";
 
 const MAX_DESC_L = 120; // on change update transaction table (DB) accordingly
@@ -54,9 +54,13 @@ const transactionFormSchema = z.object({
 export default function TransactionForm({
   currency,
   categories,
+  transaction,
+  isUpdate = false,
 }: {
   currency: string | undefined;
   categories: string[] | undefined;
+  transaction?: any;
+  isUpdate?: boolean;
 }) {
   const [date, setDate] = useState<Date>();
   const [descriptionL, setDescriptionL] = useState(0);
@@ -77,6 +81,27 @@ export default function TransactionForm({
     },
   });
 
+  // Pre-fill form data when updating
+  useEffect(() => {
+    if (isUpdate && transaction) {
+      const amount = (transaction.amount_cents / 100).toString();
+      const transactionDate = format(
+        new Date(transaction.transaction_date),
+        "yyyy-MM-dd"
+      );
+
+      form.reset({
+        amount: amount,
+        category: transaction.category,
+        transactionDate: transactionDate,
+        description: transaction.description || "",
+      });
+
+      setDate(new Date(transaction.transaction_date));
+      setDescriptionL(transaction.description?.length || 0);
+    }
+  }, [isUpdate, transaction, form]);
+
   const category_arr = categories?.map((item) => ({
     label: item,
     value: item,
@@ -84,42 +109,59 @@ export default function TransactionForm({
 
   async function onSubmit(data: z.infer<typeof transactionFormSchema>) {
     try {
-      const toastID = toast("Updating user information", {
-        description: "Please wait...",
-      });
+      const toastID = toast(
+        isUpdate ? "Updating transaction..." : "Creating transaction...",
+        {
+          description: "Please wait...",
+        }
+      );
 
-      const result = await createNewTransaction({
-        amount: data.amount,
-        category: data.category,
-        transactionDate: new Date(data.transactionDate),
-        description: data.description,
-        type: type,
-      });
+      let result;
+
+      if (isUpdate && transaction) {
+        result = await updateTransaction({
+          transactionId: transaction.transaction_id,
+          amount: data.amount,
+          category: data.category,
+          transactionDate: new Date(data.transactionDate),
+          description: data.description,
+          type: type,
+        });
+      } else {
+        result = await createNewTransaction({
+          amount: data.amount,
+          category: data.category,
+          transactionDate: new Date(data.transactionDate),
+          description: data.description,
+          type: type,
+        });
+      }
 
       toast.dismiss(toastID);
 
       if (result?.status === "error" || result?.error) {
-        toast.error("Update failed", {
-          description: "Hello world",
+        toast.error(isUpdate ? "Update failed" : "Creation failed", {
+          description: result.error,
         });
-
         return;
       }
 
       toast.success("Success", {
-        description: "Your profile updated successfully",
+        description: isUpdate
+          ? "Transaction updated successfully"
+          : "Transaction created successfully",
       });
 
-      router.replace("/");
+      router.replace(`/${type}`);
     } catch (error) {
-      console.error(`User data form error: ${JSON.stringify(error)}`);
+      console.error(`Transaction form error: ${JSON.stringify(error)}`);
     }
   }
 
   return (
     <Card className="max-w-2xl mx-auto md:mt-16">
       <CardHeader className="text-center text-3xl font-semibold hidden md:block">
-        Create {type}
+        {isUpdate ? "Update" : "Create"} {type}
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -180,7 +222,7 @@ export default function TransactionForm({
                             className="h-9"
                           />
                           <CommandList>
-                            <CommandEmpty>No currency found.</CommandEmpty>
+                            <CommandEmpty>No category found.</CommandEmpty>
                             <CommandGroup>
                               {category_arr?.map((category) => (
                                 <CommandItem
@@ -280,7 +322,7 @@ export default function TransactionForm({
               )}
             />
             <Button type="submit" variant="theme" className="w-full">
-              Create
+              {isUpdate ? "Update" : "Create"}
             </Button>
           </form>
         </Form>

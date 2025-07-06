@@ -258,3 +258,46 @@ export async function getCategoryId({
     };
   }
 }
+
+export async function fetchTransactionById({
+  transactionId,
+}: {
+  transactionId: string;
+}) {
+  try {
+    const { userId } = await auth();
+    const queryString = `
+      SELECT 
+        t.transaction_id,
+        t.transaction_date,
+        t.amount_cents,
+        t.type,
+        t.category_id,
+        c.category,
+        t.description
+      FROM transactions t
+      JOIN categories c ON t.category_id = c.category_id
+      WHERE t.transaction_id = $1 AND t.user_id = $2;
+    `;
+
+    const result = await DBquery({
+      text: queryString,
+      params: [transactionId, userId],
+    });
+
+    if (!result?.length) {
+      return { status: "error", error: "Transaction not found" };
+    }
+
+    return { status: "success", data: result[0] };
+  } catch (error) {
+    console.error(`Error fetching transaction: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching transaction",
+    };
+  }
+}
