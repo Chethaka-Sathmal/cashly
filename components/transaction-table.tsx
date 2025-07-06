@@ -245,12 +245,7 @@ export default function TransactionTable({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 border-t bg-white rounded-lg ring-sidebar-ring ring-[0.1px]">
-          <div className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, totalCount)} of {totalCount}{" "}
-            results
-          </div>
+        <div className="flex flex-col items-center justify-between gap-4">
           <Pagination>
             <PaginationContent>
               <PaginationItem>
@@ -304,6 +299,11 @@ export default function TransactionTable({
               </PaginationItem>
             </PaginationContent>
           </Pagination>
+          <div className="text-sm text-muted-foreground">
+            Showing {(currentPage - 1) * pageSize + 1} to{" "}
+            {Math.min(currentPage * pageSize, totalCount)} of {totalCount}{" "}
+            results
+          </div>
         </div>
       )}
 
