@@ -123,28 +123,38 @@ export async function fetchIncomeData({
   try {
     const { userId } = await auth();
     const offset = (currentPage - 1) * pageSize;
-    
+
     const queryString = `
-SELECT
-  t.transaction_id,
-  t.transaction_date,
-  t.amount_cents,
-  t.category_id,
-  c.category,
-  t.description
-FROM transactions t
-JOIN categories c ON t.category_id = c.category_id
-WHERE t.user_id = $1
-  AND t.type = $2
-  AND (
-    $3 = '' OR (
-      t.amount_cents::text ILIKE $3 OR
-      c.category ILIKE $3 OR
-      t.description ILIKE $3
-    )
-  )
-ORDER BY t.transaction_date DESC
-LIMIT $4 OFFSET $5;
+      SELECT
+          t.transaction_id,
+          t.transaction_date,
+          t.amount_cents,
+          t.category_id,
+          c.category,
+          t.description
+        FROM transactions t
+        JOIN categories c ON t.category_id = c.category_id
+        WHERE t.user_id = $1
+          AND t.type = $2
+          AND (
+            $3 = '' OR (
+              -- Search in dollar format (12.50)
+              (t.amount_cents / 100.0)::text ILIKE '%' || $3 || '%' OR
+              -- Search in cents format (1250)
+              t.amount_cents::text ILIKE '%' || $3 || '%' OR
+              -- Search in category
+              c.category ILIKE '%' || $3 || '%' OR
+              -- Search in description
+              t.description ILIKE '%' || $3 || '%' OR
+              -- Search in various date formats
+              TO_CHAR(t.transaction_date, 'YYYY-MM-DD') ILIKE '%' || $3 || '%' OR
+              TO_CHAR(t.transaction_date, 'MM/DD/YYYY') ILIKE '%' || $3 || '%' OR
+              TO_CHAR(t.transaction_date, 'DD/MM/YYYY') ILIKE '%' || $3 || '%' OR
+              TO_CHAR(t.transaction_date, 'Month DD, YYYY') ILIKE '%' || $3 || '%'
+            )
+          )
+        ORDER BY t.transaction_date DESC
+        LIMIT $4 OFFSET $5;
       `;
 
     const result = await DBquery<FetchIncomeData_db>({
@@ -166,27 +176,26 @@ LIMIT $4 OFFSET $5;
   }
 }
 
-export async function fetchIncomeDataCount({
-  query,
-}: {
-  query: string;
-}) {
+export async function fetchIncomeDataCount({ query }: { query: string }) {
   try {
     const { userId } = await auth();
-    
+
     const queryString = `
-SELECT COUNT(*) as total
-FROM transactions t
-JOIN categories c ON t.category_id = c.category_id
-WHERE t.user_id = $1
-  AND t.type = $2
-  AND (
-    $3 = '' OR (
-      t.amount_cents::text ILIKE $3 OR
-      c.category ILIKE $3 OR
-      t.description ILIKE $3
-    )
-  );
+      SELECT COUNT(*) as total
+      FROM transactions t
+      JOIN categories c ON t.category_id = c.category_id
+      WHERE t.user_id = $1
+        AND t.type = $2
+        AND (
+          $3 = '' OR (
+            t.amount_cents::text ILIKE $3 OR
+            c.category ILIKE $3 OR
+            t.description ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'YYYY-MM-DD') ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'MM/DD/YYYY') ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'DD/MM/YYYY') ILIKE $3
+          )
+        );
       `;
 
     const result = await DBquery<{ total: string }>({
@@ -194,7 +203,8 @@ WHERE t.user_id = $1
       params: [userId, "income", query],
     });
 
-    if (!result?.length) return { status: "error", error: "Unknown error occurred" };
+    if (!result?.length)
+      return { status: "error", error: "Unknown error occurred" };
     return { status: "success", data: parseInt(result[0].total) };
   } catch (error) {
     console.error(`Error fetching income data count: ${JSON.stringify(error)}`);
@@ -362,28 +372,31 @@ export async function fetchExpenseData({
   try {
     const { userId } = await auth();
     const offset = (currentPage - 1) * pageSize;
-    
+
     const queryString = `
-SELECT
-  t.transaction_id,
-  t.transaction_date,
-  t.amount_cents,
-  t.category_id,
-  c.category,
-  t.description
-FROM transactions t
-JOIN categories c ON t.category_id = c.category_id
-WHERE t.user_id = $1
-  AND t.type = $2
-  AND (
-    $3 = '' OR (
-      t.amount_cents::text ILIKE $3 OR
-      c.category ILIKE $3 OR
-      t.description ILIKE $3
-    )
-  )
-ORDER BY t.transaction_date DESC
-LIMIT $4 OFFSET $5;
+      SELECT
+        t.transaction_id,
+        t.transaction_date,
+        t.amount_cents,
+        t.category_id,
+        c.category,
+        t.description
+      FROM transactions t
+      JOIN categories c ON t.category_id = c.category_id
+      WHERE t.user_id = $1
+        AND t.type = $2
+        AND (
+          $3 = '' OR (
+            t.amount_cents::text ILIKE $3 OR
+            c.category ILIKE $3 OR
+            t.description ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'YYYY-MM-DD') ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'MM/DD/YYYY') ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'DD/MM/YYYY') ILIKE $3
+          )
+        )
+      ORDER BY t.transaction_date DESC
+      LIMIT $4 OFFSET $5;
       `;
 
     const result = await DBquery<FetchIncomeData_db>({
@@ -405,27 +418,26 @@ LIMIT $4 OFFSET $5;
   }
 }
 
-export async function fetchExpenseDataCount({
-  query,
-}: {
-  query: string;
-}) {
+export async function fetchExpenseDataCount({ query }: { query: string }) {
   try {
     const { userId } = await auth();
-    
+
     const queryString = `
-SELECT COUNT(*) as total
-FROM transactions t
-JOIN categories c ON t.category_id = c.category_id
-WHERE t.user_id = $1
-  AND t.type = $2
-  AND (
-    $3 = '' OR (
-      t.amount_cents::text ILIKE $3 OR
-      c.category ILIKE $3 OR
-      t.description ILIKE $3
-    )
-  );
+      SELECT COUNT(*) as total
+      FROM transactions t
+      JOIN categories c ON t.category_id = c.category_id
+      WHERE t.user_id = $1
+        AND t.type = $2
+        AND (
+          $3 = '' OR (
+            t.amount_cents::text ILIKE $3 OR
+            c.category ILIKE $3 OR
+            t.description ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'YYYY-MM-DD') ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'MM/DD/YYYY') ILIKE $3 OR
+            TO_CHAR(t.transaction_date, 'DD/MM/YYYY') ILIKE $3
+          )
+        );
       `;
 
     const result = await DBquery<{ total: string }>({
@@ -433,10 +445,13 @@ WHERE t.user_id = $1
       params: [userId, "expense", query],
     });
 
-    if (!result?.length) return { status: "error", error: "Unknown error occurred" };
+    if (!result?.length)
+      return { status: "error", error: "Unknown error occurred" };
     return { status: "success", data: parseInt(result[0].total) };
   } catch (error) {
-    console.error(`Error fetching expense data count: ${JSON.stringify(error)}`);
+    console.error(
+      `Error fetching expense data count: ${JSON.stringify(error)}`
+    );
     return {
       status: "error",
       error:

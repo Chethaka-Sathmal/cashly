@@ -1,6 +1,6 @@
 export default function formatDate(
   input: string | Date,
-  format: "dd-mm-yyyy" | "yyyy-mm-dd" = "dd-mm-yyyy"
+  format: "dd-mm-yyyy" | "yyyy-mm-dd" = "yyyy-mm-dd"
 ) {
   const date = new Date(input);
 
@@ -8,9 +8,9 @@ export default function formatDate(
   const month = String(date.getMonth() + 1).padStart(2, "0"); // 0-indexed
   const year = date.getFullYear();
 
-  if (format === "yyyy-mm-dd") {
-    return `${year}-${month}-${day}`;
+  if (format === "dd-mm-yyyy") {
+    return `${day}-${month}-${year}`;
   }
 
-  return `${day}-${month}-${year}`;
+  return `${year}-${month}-${day}`;
 }

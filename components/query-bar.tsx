@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 const QueryBarSchema = z.object({
   search: z.string(),
@@ -26,7 +26,7 @@ export default function QueryBar() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
-  const params = new URLSearchParams(searchParams);
+  // const params = new URLSearchParams(searchParams);
   let type: "income" | "expense";
   if (pathname.startsWith("/")) {
     type = pathname.slice(1) as "income" | "expense";
@@ -35,7 +35,7 @@ export default function QueryBar() {
   const form = useForm<QueryBarData>({
     resolver: zodResolver(QueryBarSchema),
     defaultValues: {
-      search: "",
+      search: searchParams.get("query") || "",
     },
   });
 
@@ -46,6 +46,8 @@ export default function QueryBar() {
     } else {
       params.delete("query");
     }
+    // Reset to page 1 when searching
+    params.delete("page");
     router.replace(`${pathname}?${params.toString()}`);
   }, 300);
 
@@ -54,7 +56,7 @@ export default function QueryBar() {
   }
 
   return (
-    <section className="flex mx-auto gap-2 max-w-3xl mb-6 md:mt-6 md:mb-10">
+    <section className="flex mx-auto gap-2 max-w-3xl mb-6 md:mt-6">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -66,16 +68,18 @@ export default function QueryBar() {
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormControl>
-                  <div className="flex-1">
+                  <div className="flex-1 relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
-                      className="bg-white shadow-none w-full"
+                      className="bg-white shadow-none w-full pl-10"
                       placeholder="Search..."
-                      defaultValue={searchParams.get("query")?.toString()}
-                      {...field}
+                      value={field.value}
                       onChange={(e) => {
                         field.onChange(e); // update RHF state
                         handleSearch(e.target.value); // pass string to your handler
                       }}
+                      onBlur={field.onBlur}
+                      name={field.name}
                     />
                   </div>
                 </FormControl>

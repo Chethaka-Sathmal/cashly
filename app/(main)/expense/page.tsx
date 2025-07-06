@@ -40,9 +40,6 @@ export default async function Expense(props: {
         totalCount={result_3.data || 0}
         currentPage={currentPage}
         pageSize={pageSize}
-        onPageChange={(page) => {
-          // This will be handled by the client component
-        }}
       />
     </div>
   );
