@@ -469,3 +469,61 @@ export async function fetchExpenseDataCount({ query }: { query: string }) {
     };
   }
 }
+
+export async function fetchSummaryData() {
+  try {
+    const { userId } = await auth();
+    
+    const queryString = `
+SELECT 
+  COALESCE(SUM(CASE WHEN type = 'income' THEN amount_cents ELSE 0 END), 0) as total_income_cents,
+  COALESCE(SUM(CASE WHEN type = 'expense' THEN amount_cents ELSE 0 END), 0) as total_expense_cents
+FROM transactions 
+WHERE user_id = $1;
+    `;
+
+    const result = await DBquery<{
+      total_income_cents: string;
+      total_expense_cents: string;
+    }>({
+      text: queryString,
+      params: [userId],
+    });
+
+    if (!result?.length) {
+      return { 
+        status: "success", 
+        data: { 
+          totalIncome: 0, 
+          totalExpense: 0, 
+          balance: 0, 
+          savingsRate: 0 
+        } 
+      };
+    }
+
+    const totalIncome = parseInt(result[0].total_income_cents);
+    const totalExpense = parseInt(result[0].total_expense_cents);
+    const balance = totalIncome - totalExpense;
+    const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100) : 0;
+
+    return { 
+      status: "success", 
+      data: { 
+        totalIncome, 
+        totalExpense, 
+        balance, 
+        savingsRate: Math.round(savingsRate * 100) / 100 // Round to 2 decimal places
+      } 
+    };
+  } catch (error) {
+    console.error(`Error fetching summary data: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching summary data",
+    };
+  }
+}
