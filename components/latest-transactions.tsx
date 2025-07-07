@@ -18,10 +18,10 @@ function truncateText(text: string, maxLength: number = 30) {
 }
 
 export async function LatestTransactions() {
-  const result = await fetchLatestTransactions(10);
+  const result = await fetchLatestTransactions(7);
 
   return (
-    <Card className="w-full">
+    <Card className="w-full md:w-xl">
       <CardHeader>
         <CardTitle>Latest transactions</CardTitle>
         <CardDescription>Your latest transactions</CardDescription>
@@ -36,9 +36,9 @@ export async function LatestTransactions() {
                     <TableCell className="py-4 w-[40px]">{idx + 1}</TableCell>
                     <TableCell className="py-4 capitalize">{tx.type}</TableCell>
                     <TableCell className="py-4">{tx.category}</TableCell>
-                    <TableCell className="py-4 hidden sm:table-cell">
+                    {/* <TableCell className="py-4 hidden sm:table-cell">
                       {truncateText(tx.description)}
-                    </TableCell>
+                    </TableCell> */}
                     <TableCell
                       className={`py-4 text-right font-medium ${
                         tx.type === "income" ? "text-green-600" : "text-red-600"
@@ -64,7 +64,10 @@ export async function LatestTransactions() {
       </CardContent>
       <CardFooter className="flex justify-end pt-2">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/${result.data?.[0]?.type ?? "expense"}`} className="flex items-center">
+          <Link
+            href={`/${result.data?.[0]?.type ?? "expense"}`}
+            className="flex items-center"
+          >
             View all transactions
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>

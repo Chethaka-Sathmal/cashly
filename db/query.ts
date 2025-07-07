@@ -473,7 +473,7 @@ export async function fetchExpenseDataCount({ query }: { query: string }) {
 export async function fetchSummaryData() {
   try {
     const { userId } = await auth();
-    
+
     const queryString = `
 SELECT 
   COALESCE(SUM(CASE WHEN type = 'income' THEN amount_cents ELSE 0 END), 0) as total_income_cents,
@@ -491,30 +491,30 @@ WHERE user_id = $1;
     });
 
     if (!result?.length) {
-      return { 
-        status: "success", 
-        data: { 
-          totalIncome: 0, 
-          totalExpense: 0, 
-          balance: 0, 
-          savingsRate: 0 
-        } 
+      return {
+        status: "success",
+        data: {
+          totalIncome: 0,
+          totalExpense: 0,
+          balance: 0,
+          savingsRate: 0,
+        },
       };
     }
 
     const totalIncome = parseInt(result[0].total_income_cents);
     const totalExpense = parseInt(result[0].total_expense_cents);
     const balance = totalIncome - totalExpense;
-    const savingsRate = totalIncome > 0 ? ((balance / totalIncome) * 100) : 0;
+    const savingsRate = totalIncome > 0 ? (balance / totalIncome) * 100 : 0;
 
-    return { 
-      status: "success", 
-      data: { 
-        totalIncome, 
-        totalExpense, 
-        balance, 
-        savingsRate: Math.round(savingsRate * 100) / 100 // Round to 2 decimal places
-      } 
+    return {
+      status: "success",
+      data: {
+        totalIncome,
+        totalExpense,
+        balance,
+        savingsRate: Math.round(savingsRate * 100) / 100, // Round to 2 decimal places
+      },
     };
   } catch (error) {
     console.error(`Error fetching summary data: ${JSON.stringify(error)}`);
@@ -560,7 +560,9 @@ export async function fetchLatestTransactions(limit: number = 10) {
     });
     return { status: "success", data: result };
   } catch (error) {
-    console.error(`Error fetching latest transactions: ${JSON.stringify(error)}`);
+    console.error(
+      `Error fetching latest transactions: ${JSON.stringify(error)}`
+    );
     return {
       status: "error",
       error:
@@ -574,7 +576,7 @@ export async function fetchLatestTransactions(limit: number = 10) {
 export async function fetchIncomeByCategory() {
   try {
     const { userId } = await auth();
-    
+
     const queryString = `
       SELECT 
         c.category,
@@ -595,24 +597,29 @@ export async function fetchIncomeByCategory() {
     });
 
     if (!result?.length) {
-      return { 
-        status: "success", 
-        data: [] 
+      return {
+        status: "success",
+        data: [],
       };
     }
 
-    return { 
-      status: "success", 
-      data: result.map(row => ({
+    return {
+      status: "success",
+      data: result.map((row) => ({
         category: row.category,
-        amount: parseInt(row.total_amount_cents)/100,
-      }))
+        amount: parseInt(row.total_amount_cents) / 100,
+      })),
     };
   } catch (error) {
-    console.error(`Error fetching income by category: ${JSON.stringify(error)}`);
+    console.error(
+      `Error fetching income by category: ${JSON.stringify(error)}`
+    );
     return {
       status: "error",
-      error: error instanceof Error ? error.message.toString() : "Error fetching income by category",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching income by category",
     };
   }
 }
@@ -620,7 +627,7 @@ export async function fetchIncomeByCategory() {
 export async function fetchExpenseByCategory() {
   try {
     const { userId } = await auth();
-    
+
     const queryString = `
       SELECT 
         c.category,
@@ -641,24 +648,29 @@ export async function fetchExpenseByCategory() {
     });
 
     if (!result?.length) {
-      return { 
-        status: "success", 
-        data: [] 
+      return {
+        status: "success",
+        data: [],
       };
     }
 
-    return { 
-      status: "success", 
-      data: result.map(row => ({
+    return {
+      status: "success",
+      data: result.map((row) => ({
         category: row.category,
-        amount: parseInt(row.total_amount_cents)/100,
-      }))
+        amount: parseInt(row.total_amount_cents) / 100,
+      })),
     };
   } catch (error) {
-    console.error(`Error fetching expense by category: ${JSON.stringify(error)}`);
+    console.error(
+      `Error fetching expense by category: ${JSON.stringify(error)}`
+    );
     return {
       status: "error",
-      error: error instanceof Error ? error.message.toString() : "Error fetching expense by category",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching expense by category",
     };
   }
 }
