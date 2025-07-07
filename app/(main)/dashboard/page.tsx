@@ -8,6 +8,7 @@ import DonutChartSkeleton from "@/components/skeleton/donut-chart-skeleton";
 import { LatestTransactions } from "@/components/latest-transactions";
 import LatestTransactionsSkeleton from "@/components/skeleton/latest-transactions-skeleton";
 import BarChartMultiple from "@/components/charts/bar-chart-multiple";
+import BarChartSkeleton from "@/components/skeleton/bar-chart-skeleton";
 import InteractiveLineChart from "@/components/charts/interactive-line-chart";
 
 export default function Dashboard() {
@@ -28,7 +29,9 @@ export default function Dashboard() {
         <Suspense fallback={<LatestTransactionsSkeleton />}>
           <LatestTransactions />
         </Suspense>
-        <BarChartMultiple />
+        <Suspense fallback={<BarChartSkeleton />}>
+          <BarChartMultiple />
+        </Suspense>
       </div>
       <InteractiveLineChart />
     </div>

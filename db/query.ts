@@ -674,3 +674,60 @@ export async function fetchExpenseByCategory() {
     };
   }
 }
+
+export async function fetchMonthlyTotals() {
+  try {
+    const { userId } = await auth();
+    
+    const queryString = `
+      WITH months AS (
+        SELECT generate_series(
+          date_trunc('month', current_date) - interval '7 months',
+          date_trunc('month', current_date),
+          interval '1 month'
+        )::date as month_start
+      )
+      SELECT 
+        to_char(m.month_start, 'Month') as month,
+        COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount_cents ELSE 0 END) / 100.0, 0) as income,
+        COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount_cents ELSE 0 END) / 100.0, 0) as expense
+      FROM months m
+      LEFT JOIN transactions t ON 
+        t.user_id = $1 AND
+        date_trunc('month', t.transaction_date) = m.month_start
+      GROUP BY m.month_start
+      ORDER BY m.month_start DESC;
+    `;
+
+    const result = await DBquery<{
+      month: string;
+      income: string;
+      expense: string;
+    }>({
+      text: queryString,
+      params: [userId],
+    });
+
+    if (!result?.length) {
+      return { 
+        status: "success", 
+        data: [] 
+      };
+    }
+
+    return { 
+      status: "success", 
+      data: result.map(row => ({
+        month: row.month.trim(), // Remove extra spaces from month name
+        income: parseFloat(row.income),
+        expense: parseFloat(row.expense)
+      }))
+    };
+  } catch (error) {
+    console.error(`Error fetching monthly totals: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error: error instanceof Error ? error.message.toString() : "Error fetching monthly totals",
+    };
+  }
+}
