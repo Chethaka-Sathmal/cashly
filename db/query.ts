@@ -731,3 +731,70 @@ export async function fetchMonthlyTotals() {
     };
   }
 }
+
+export async function fetchDailyFinancials() {
+  try {
+    const { userId } = await auth();
+    
+    const queryString = `
+      WITH RECURSIVE dates AS (
+        SELECT current_date - interval '89 days' as date
+        UNION ALL
+        SELECT date + interval '1 day'
+        FROM dates
+        WHERE date < current_date
+      ),
+      daily_totals AS (
+        SELECT 
+          d.date::date as transaction_date,
+          COALESCE(SUM(CASE WHEN t.type = 'income' THEN t.amount_cents ELSE 0 END) / 100.0, 0) as income,
+          COALESCE(SUM(CASE WHEN t.type = 'expense' THEN t.amount_cents ELSE 0 END) / 100.0, 0) as expense
+        FROM dates d
+        LEFT JOIN transactions t ON 
+          t.user_id = $1 AND
+          date_trunc('day', t.transaction_date) = d.date
+        GROUP BY d.date
+      )
+      SELECT 
+        to_char(transaction_date, 'YYYY-MM-DD') as date,
+        income,
+        expense,
+        (income - expense) as balance
+      FROM daily_totals
+      ORDER BY transaction_date ASC;
+    `;
+
+    const result = await DBquery<{
+      date: string;
+      income: string;
+      expense: string;
+      balance: string;
+    }>({
+      text: queryString,
+      params: [userId],
+    });
+
+    if (!result?.length) {
+      return { 
+        status: "success", 
+        data: [] 
+      };
+    }
+
+    return { 
+      status: "success", 
+      data: result.map(row => ({
+        date: row.date,
+        income: parseFloat(row.income),
+        expense: parseFloat(row.expense),
+        balance: parseFloat(row.balance)
+      }))
+    };
+  } catch (error) {
+    console.error(`Error fetching daily financials: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error: error instanceof Error ? error.message.toString() : "Error fetching daily financials",
+    };
+  }
+}
