@@ -1,0 +1,69 @@
+import { fetchIncomeByCategory } from "@/db/query";
+import { ChartConfig } from "@/components/ui/chart";
+import DonutChart from "./donut-chart";
+
+// Define chart configuration
+const chartConfig = {
+  amount: {
+    label: "Amount",
+  },
+  salary: {
+    label: "Salary",
+    color: "var(--chart-1)",
+  },
+  investment: {
+    label: "Investment",
+    color: "var(--chart-2)",
+  },
+  freelance: {
+    label: "Freelance",
+    color: "var(--chart-3)",
+  },
+  business: {
+    label: "Business",
+    color: "var(--chart-4)",
+  },
+  miscellaneous: {
+    label: "Miscellaneous",
+    color: "var(--chart-5)",
+  },
+} satisfies ChartConfig;
+
+export default async function IncomeDonutChart() {
+  const result = await fetchIncomeByCategory();
+
+  //   console.log(`result: ${JSON.stringify(result)}`);
+
+  if (result.status === "error" || !result.data) {
+    throw new Error(result.error || "Failed to fetch income data");
+  }
+
+  // Sort categories by amount and get top 4
+  const sortedData = result.data.sort((a, b) => b.amount - a.amount);
+  const topCategories = sortedData.slice(0, 4);
+
+  // Sum up remaining categories into "Miscellaneous"
+  const otherCategories = sortedData.slice(4);
+  const miscTotal = otherCategories.reduce((sum, cat) => sum + cat.amount, 0);
+  //   console.log(miscTotal);
+
+  // Prepare chart data
+  const chartData = [
+    ...topCategories.map((cat, idx) => ({
+      category: cat.category.toLowerCase(),
+      amount: cat.amount,
+      fill: `var(--chart-${idx + 1})`,
+    })),
+  ];
+
+  // Add miscellaneous if there are other categories
+  chartData.push({
+    category: "miscellaneous",
+    amount: miscTotal,
+    fill: "var(--chart-5)",
+  });
+
+  //   console.log(`chartData: ${JSON.stringify(chartData)}`);
+
+  return <DonutChart type="income" data={chartData} config={chartConfig} />;
+}

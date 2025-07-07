@@ -570,3 +570,95 @@ export async function fetchLatestTransactions(limit: number = 10) {
     };
   }
 }
+
+export async function fetchIncomeByCategory() {
+  try {
+    const { userId } = await auth();
+    
+    const queryString = `
+      SELECT 
+        c.category,
+        COALESCE(SUM(t.amount_cents), 0) as total_amount_cents
+      FROM transactions t
+      JOIN categories c ON t.category_id = c.category_id
+      WHERE t.user_id = $1 AND t.type = 'income'
+      GROUP BY c.category
+      ORDER BY total_amount_cents DESC;
+    `;
+
+    const result = await DBquery<{
+      category: string;
+      total_amount_cents: string;
+    }>({
+      text: queryString,
+      params: [userId],
+    });
+
+    if (!result?.length) {
+      return { 
+        status: "success", 
+        data: [] 
+      };
+    }
+
+    return { 
+      status: "success", 
+      data: result.map(row => ({
+        category: row.category,
+        amount: parseInt(row.total_amount_cents)/100,
+      }))
+    };
+  } catch (error) {
+    console.error(`Error fetching income by category: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error: error instanceof Error ? error.message.toString() : "Error fetching income by category",
+    };
+  }
+}
+
+export async function fetchExpenseByCategory() {
+  try {
+    const { userId } = await auth();
+    
+    const queryString = `
+      SELECT 
+        c.category,
+        COALESCE(SUM(t.amount_cents), 0) as total_amount_cents
+      FROM transactions t
+      JOIN categories c ON t.category_id = c.category_id
+      WHERE t.user_id = $1 AND t.type = 'expense'
+      GROUP BY c.category
+      ORDER BY total_amount_cents DESC;
+    `;
+
+    const result = await DBquery<{
+      category: string;
+      total_amount_cents: string;
+    }>({
+      text: queryString,
+      params: [userId],
+    });
+
+    if (!result?.length) {
+      return { 
+        status: "success", 
+        data: [] 
+      };
+    }
+
+    return { 
+      status: "success", 
+      data: result.map(row => ({
+        category: row.category,
+        amount: parseInt(row.total_amount_cents)/100,
+      }))
+    };
+  } catch (error) {
+    console.error(`Error fetching expense by category: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error: error instanceof Error ? error.message.toString() : "Error fetching expense by category",
+    };
+  }
+}
