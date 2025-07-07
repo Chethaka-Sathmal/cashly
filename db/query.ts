@@ -527,3 +527,46 @@ WHERE user_id = $1;
     };
   }
 }
+
+export async function fetchLatestTransactions(limit: number = 10) {
+  try {
+    const { userId } = await auth();
+    const queryString = `
+      SELECT 
+        t.transaction_id,
+        t.transaction_date,
+        t.amount_cents,
+        t.type,
+        t.category_id,
+        c.category,
+        t.description
+      FROM transactions t
+      JOIN categories c ON t.category_id = c.category_id
+      WHERE t.user_id = $1
+      ORDER BY t.transaction_date DESC, t.transaction_id DESC
+      LIMIT $2;
+    `;
+    const result = await DBquery<{
+      transaction_id: string;
+      transaction_date: string;
+      amount_cents: number;
+      type: string;
+      category_id: string;
+      category: string;
+      description: string;
+    }>({
+      text: queryString,
+      params: [userId, limit],
+    });
+    return { status: "success", data: result };
+  } catch (error) {
+    console.error(`Error fetching latest transactions: ${JSON.stringify(error)}`);
+    return {
+      status: "error",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching latest transactions",
+    };
+  }
+}
