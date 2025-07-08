@@ -10,6 +10,7 @@ import LatestTransactionsSkeleton from "@/components/skeleton/latest-transaction
 import BarChartMultiple from "@/components/charts/bar-chart-multiple";
 import BarChartSkeleton from "@/components/skeleton/bar-chart-skeleton";
 import InteractiveLineChart from "@/components/charts/interactive-line-chart";
+import InteractiveLineChartSkeleton from "@/components/skeleton/interactive-line-chart-skeleton";
 
 export default function Dashboard() {
   return (
@@ -33,7 +34,9 @@ export default function Dashboard() {
           <BarChartMultiple />
         </Suspense>
       </div>
-      <InteractiveLineChart />
+      <Suspense fallback={<InteractiveLineChartSkeleton />}>
+        <InteractiveLineChart />
+      </Suspense>
     </div>
   );
 }

@@ -18,7 +18,7 @@ function truncateText(text: string, maxLength: number = 30) {
 }
 
 export async function LatestTransactions() {
-  const result = await fetchLatestTransactions(7);
+  const result = await fetchLatestTransactions(8);
 
   return (
     <Card className="w-full md:w-xl">
@@ -62,13 +62,16 @@ export async function LatestTransactions() {
           </Table>
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end pt-2">
+      <CardFooter className="flex justify-end items-center pt-2">
         <Button variant="ghost" size="sm" asChild>
-          <Link
-            href={`/${result.data?.[0]?.type ?? "expense"}`}
-            className="flex items-center"
-          >
-            View all transactions
+          <Link href="/expense" className="flex items-center">
+            Expenses
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+        <Button variant="ghost" size="sm" asChild>
+          <Link href="/income" className="flex items-center">
+            Income
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
