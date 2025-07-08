@@ -8,15 +8,18 @@ import {
 export default async function UpdateTransaction({
   searchParams,
 }: {
-  searchParams: { transaction_id: string };
+  searchParams: Promise<{ transaction_id: string }>;
 }) {
-  const currency = await fetchCurrencyMethod();
-  const category_res = await fetchCategories({ type: "income" });
-  const categories = category_res.data?.map((i) => i.category);
+  const params = await searchParams;
+  const [currency, category_res, transaction] = await Promise.all([
+    fetchCurrencyMethod(),
+    fetchCategories({ type: "income" }),
+    fetchTransactionById({
+      transactionId: params.transaction_id,
+    }),
+  ]);
 
-  const transaction = await fetchTransactionById({
-    transactionId: searchParams.transaction_id,
-  });
+  const categories = category_res.data?.map((i) => i.category);
 
   return (
     <TransactionForm

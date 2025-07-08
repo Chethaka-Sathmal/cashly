@@ -15,6 +15,8 @@ const robotoSlab = Roboto_Slab({
   weight: ["400"],
 });
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Cashly",
   description: "Expense tracker app",
