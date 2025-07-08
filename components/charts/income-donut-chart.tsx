@@ -32,8 +32,6 @@ const chartConfig = {
 export default async function IncomeDonutChart() {
   const result = await fetchIncomeByCategory();
 
-  //   console.log(`result: ${JSON.stringify(result)}`);
-
   if (result.status === "error" || !result.data) {
     throw new Error(result.error || "Failed to fetch income data");
   }
@@ -45,7 +43,6 @@ export default async function IncomeDonutChart() {
   // Sum up remaining categories into "Miscellaneous"
   const otherCategories = sortedData.slice(4);
   const miscTotal = otherCategories.reduce((sum, cat) => sum + cat.amount, 0);
-  //   console.log(miscTotal);
 
   // Prepare chart data
   const chartData = [
@@ -62,8 +59,6 @@ export default async function IncomeDonutChart() {
     amount: miscTotal,
     fill: "var(--chart-5)",
   });
-
-  //   console.log(`chartData: ${JSON.stringify(chartData)}`);
 
   return <DonutChart type="income" data={chartData} config={chartConfig} />;
 }

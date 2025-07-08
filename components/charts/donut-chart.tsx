@@ -31,7 +31,6 @@ interface DonutChartProps {
 }
 
 export default function DonutChart({ type, data, config }: DonutChartProps) {
-  console.log(`data: ${JSON.stringify(data)}`);
   const total = data?.reduce((sum, item) => sum + item.amount, 0) || 0;
   const formattedTotal = new Intl.NumberFormat("en-US", {
     style: "currency",

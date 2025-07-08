@@ -41,8 +41,6 @@ export default function SignInPage() {
   async function signInWithGoogle(strategy: OAuthStrategy) {
     if (!signIn) return;
 
-    console.log("Google sign in");
-
     return await signIn
       .authenticateWithRedirect({
         strategy,
@@ -55,7 +53,7 @@ export default function SignInPage() {
       .catch((err: any) => {
         // See https://clerk.com/docs/custom-flows/error-handling
         // for more info on error handling
-        console.log(err.errors);
+        console.error(err.errors);
         console.error(err, null, 2);
         setErrors(err);
       });

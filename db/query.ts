@@ -120,8 +120,6 @@ export async function fetchTableData({
   type: "income" | "expense";
   pageSize?: number;
 }) {
-  console.log(`query: ${query}`);
-  console.log(`currentPage: ${currentPage}`);
   try {
     const { userId } = await auth();
     const offset = (currentPage - 1) * pageSize;
@@ -375,8 +373,6 @@ export async function fetchExpenseData({
   currentPage: number;
   pageSize?: number;
 }) {
-  console.log(`query: ${query}`);
-  console.log(`currentPage: ${currentPage}`);
   try {
     const { userId } = await auth();
     const offset = (currentPage - 1) * pageSize;
@@ -678,7 +674,7 @@ export async function fetchExpenseByCategory() {
 export async function fetchMonthlyTotals() {
   try {
     const { userId } = await auth();
-    
+
     const queryString = `
       WITH months AS (
         SELECT generate_series(
@@ -709,25 +705,28 @@ export async function fetchMonthlyTotals() {
     });
 
     if (!result?.length) {
-      return { 
-        status: "success", 
-        data: [] 
+      return {
+        status: "success",
+        data: [],
       };
     }
 
-    return { 
-      status: "success", 
-      data: result.map(row => ({
+    return {
+      status: "success",
+      data: result.map((row) => ({
         month: row.month.trim(), // Remove extra spaces from month name
         income: parseFloat(row.income),
-        expense: parseFloat(row.expense)
-      }))
+        expense: parseFloat(row.expense),
+      })),
     };
   } catch (error) {
     console.error(`Error fetching monthly totals: ${JSON.stringify(error)}`);
     return {
       status: "error",
-      error: error instanceof Error ? error.message.toString() : "Error fetching monthly totals",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching monthly totals",
     };
   }
 }
@@ -735,7 +734,7 @@ export async function fetchMonthlyTotals() {
 export async function fetchDailyFinancials() {
   try {
     const { userId } = await auth();
-    
+
     const queryString = `
       WITH RECURSIVE dates AS (
         SELECT current_date - interval '89 days' as date
@@ -775,26 +774,29 @@ export async function fetchDailyFinancials() {
     });
 
     if (!result?.length) {
-      return { 
-        status: "success", 
-        data: [] 
+      return {
+        status: "success",
+        data: [],
       };
     }
 
-    return { 
-      status: "success", 
-      data: result.map(row => ({
+    return {
+      status: "success",
+      data: result.map((row) => ({
         date: row.date,
         income: parseFloat(row.income),
         expense: parseFloat(row.expense),
-        balance: parseFloat(row.balance)
-      }))
+        balance: parseFloat(row.balance),
+      })),
     };
   } catch (error) {
     console.error(`Error fetching daily financials: ${JSON.stringify(error)}`);
     return {
       status: "error",
-      error: error instanceof Error ? error.message.toString() : "Error fetching daily financials",
+      error:
+        error instanceof Error
+          ? error.message.toString()
+          : "Error fetching daily financials",
     };
   }
 }

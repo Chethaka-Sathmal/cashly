@@ -7,23 +7,15 @@ const publicRoutes = createRouteMatcher([
   "/",
 ]);
 
-// 🛑 Un-comment later
-
-export default clerkMiddleware(
-  async (auth, req) => {
-    // console.log("middleware executed");
-    if (req.nextUrl.pathname.startsWith("/api/uploadthing")) {
-      return;
-    }
-
-    if (!publicRoutes(req)) {
-      await auth.protect();
-    }
+export default clerkMiddleware(async (auth, req) => {
+  if (req.nextUrl.pathname.startsWith("/api/uploadthing")) {
+    return;
   }
-  // { debug: true } // ❌ Remove in prod
-);
 
-// export default clerkMiddleware();
+  if (!publicRoutes(req)) {
+    await auth.protect();
+  }
+});
 
 export const config = {
   matcher: [
