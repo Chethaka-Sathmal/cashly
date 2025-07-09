@@ -14,8 +14,6 @@ export default function AppHeader() {
       <div className="w-full text-center">
         <h1 className="text-3xl font-robot-slab">{title}</h1>
       </div>
-      {/* Delete after development */}
-      <div className="bg-red-400 sm:bg-blue-400 md:bg-green-400 lg:bg-purple-400 xl:bg-yellow-400 rounded-full h-[30px] w-[30px]" />
     </header>
   );
 }

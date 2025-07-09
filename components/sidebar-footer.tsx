@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { User } from "lucide-react";
 
 export default function SidebarFooterComponent() {
   const [userInfo, setUserInfo] = useState({
@@ -53,17 +54,19 @@ export default function SidebarFooterComponent() {
       {user && (
         <>
           <div className="w-10 h-10 overflow-hidden rounded-full bg-gray-100">
-            <Image
-              src={
-                userInfo.profilePictureURL
-                  ? userInfo.profilePictureURL
-                  : user.imageUrl
-              }
-              alt="User profile picture"
-              height={45}
-              width={45}
-              className="object-cover w-full h-full"
-            />
+            {userInfo.profilePictureURL ? (
+              <Image
+                src={userInfo.profilePictureURL}
+                alt="User profile picture"
+                height={45}
+                width={45}
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full">
+                <User size={24} className="text-gray-600" />
+              </div>
+            )}
           </div>
           <div>
             <div className="flex gap-2">

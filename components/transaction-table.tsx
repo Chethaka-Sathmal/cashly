@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/pagination";
 import { FetchIncomeData_db } from "@/types";
 import formatDate from "@/utils/format-date";
-import { Trash2, PencilLine } from "lucide-react";
+import { Trash2, PencilLine, PiggyBank } from "lucide-react";
 import { toast } from "sonner";
 
 export default function TransactionTable({
@@ -232,12 +232,25 @@ export default function TransactionTable({
                 </TableRow>
               ))
             ) : (
-              <TableCell colSpan={7}>
-                <div className="flex flex-col items-center gap-4 w-full py-12">
-                  <h2 className="text-3xl">Oopsie daisy 🥀</h2>
-                  <p className="text-lg">No transaction records found</p>
-                </div>
-              </TableCell>
+              <TableRow>
+                <TableCell colSpan={7}>
+                  <div className="flex flex-col items-center gap-3 w-full py-12 text-muted-foreground px-4">
+                    <PiggyBank
+                      size={96}
+                      strokeWidth={1}
+                      className="text-gray-400"
+                    />
+                    <h3 className="text-lg font-semibold text-center">
+                      No transactions found
+                    </h3>
+                    <p className="text-sm text-center break-words hidden md:block">
+                      {searchParams.toString()
+                        ? "Try adjusting your search filters to find what you're looking for"
+                        : `Start tracking your ${type} by adding your first transaction using the "Add" button above`}
+                    </p>
+                  </div>
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>

@@ -149,24 +149,24 @@ export default function UserDataForm({
 
   return (
     <section className="flex justify-center items-center">
-      <Card className="bg-white shadow-none w-lg">
-        <CardContent>
+      <Card className="bg-white shadow-none w-full max-w-lg">
+        <CardContent className="pt-6">
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit((data) =>
                 type === "create" ? onSubmitCreate(data) : onSubmitEdit(data)
               )}
-              className="space-y-8"
+              className="space-y-6"
             >
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
                 <div className="flex flex-col items-center text-center">
-                  <h1 className="text-3xl font-bold">{title}</h1>
-                  <p className="text-muted-foreground text-balance">
+                  <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+                  <p className="text-muted-foreground text-balance text-sm sm:text-base">
                     {subTittle}
                   </p>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col md:flex-row gap-3">
                 <FormField
                   control={form.control}
                   name="fName"
@@ -211,8 +211,8 @@ export default function UserDataForm({
                 name="currency"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <div className="flex items-center gap-3">
-                      <FormLabel>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                      <FormLabel className="mb-0">
                         Currency <span className="text-destructive">*</span>
                       </FormLabel>
                       <Popover>
@@ -222,7 +222,7 @@ export default function UserDataForm({
                               variant="outline"
                               role="combobox"
                               className={cn(
-                                "justify-between shadow-none bg-white w-[285px] md:w-[375px]",
+                                "justify-between shadow-none bg-white w-[260px] md:w-[375px]",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
@@ -231,11 +231,11 @@ export default function UserDataForm({
                                     (language) => language.value === field.value
                                   )?.label
                                 : "Select language"}
-                              <ChevronsUpDown className="opacity-50" />
+                              <ChevronsUpDown className="opacity-50 h-4 w-4" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className=" w-[300px] md:w-[390px] p-0">
+                        <PopoverContent className="w-full min-w-[200px] p-0">
                           <Command>
                             <CommandInput
                               placeholder="Search currency..."
@@ -258,7 +258,7 @@ export default function UserDataForm({
                                     {currencyISO_Code.label}
                                     <Check
                                       className={cn(
-                                        "ml-auto",
+                                        "ml-auto h-4 w-4",
                                         currencyISO_Code.value === field.value
                                           ? "opacity-100"
                                           : "opacity-0"
@@ -284,7 +284,7 @@ export default function UserDataForm({
                     <FormItem>
                       <FormLabel>Profile picture</FormLabel>
                       <FormControl>
-                        <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
                           <Input
                             id="profilePic"
                             type="file"
@@ -293,7 +293,7 @@ export default function UserDataForm({
                               field.onChange(e.target.files?.[0])
                             }
                             name="profilePicture"
-                            className="shadow-none"
+                            className="shadow-none text-sm"
                             ref={(el) => {
                               field.ref(el);
                               profilePictureRef.current = el;
@@ -303,7 +303,7 @@ export default function UserDataForm({
                             type="button"
                             variant={"destructiveLight"}
                             size={"icon"}
-                            className="border-1"
+                            className="border-1 shrink-0"
                             onClick={() => {
                               form.setValue("profilePicture", undefined, {
                                 shouldValidate: true,
@@ -314,7 +314,7 @@ export default function UserDataForm({
                               }
                             }}
                           >
-                            <Trash2 />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </FormControl>
